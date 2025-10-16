@@ -1,0 +1,340 @@
+import { type Abi } from "@starknet-react/core";
+const contractAbi = [
+  {
+    type: "impl",
+    name: "IZkBadgeImpl",
+    interface_name: "zkbadge::IZkBadge",
+  },
+  {
+    type: "struct",
+    name: "core::array::Span::<core::felt252>",
+    members: [
+      { name: "snapshot", type: "@core::array::Array::<core::felt252>" },
+    ],
+  },
+  {
+    type: "enum",
+    name: "core::bool",
+    variants: [
+      { name: "False", type: "()" },
+      { name: "True", type: "()" },
+    ],
+  },
+  {
+    type: "struct",
+    name: "core::integer::u256",
+    members: [
+      { name: "low", type: "core::integer::u128" },
+      { name: "high", type: "core::integer::u128" },
+    ],
+  },
+  {
+    type: "struct",
+    name: "core::array::Span::<core::integer::u256>",
+    members: [
+      {
+        name: "snapshot",
+        type: "@core::array::Array::<core::integer::u256>",
+      },
+    ],
+  },
+  {
+    type: "struct",
+    name: "core::byte_array::ByteArray",
+    members: [
+      {
+        name: "data",
+        type: "core::array::Array::<core::bytes_31::bytes31>",
+      },
+      { name: "pending_word", type: "core::felt252" },
+      { name: "pending_word_len", type: "core::integer::u32" },
+    ],
+  },
+  {
+    type: "struct",
+    name: "zkbadge::VoteTally",
+    members: [
+      { name: "up", type: "core::integer::u64" },
+      { name: "down", type: "core::integer::u64" },
+    ],
+  },
+  {
+    type: "struct",
+    name: "zkbadge::Feature",
+    members: [
+      {
+        name: "creator",
+        type: "core::starknet::contract_address::ContractAddress",
+      },
+      { name: "name", type: "core::byte_array::ByteArray" },
+      { name: "description", type: "core::byte_array::ByteArray" },
+      { name: "category", type: "core::byte_array::ByteArray" },
+      { name: "image_url", type: "core::byte_array::ByteArray" },
+      { name: "min_age", type: "core::integer::u256" },
+      { name: "price", type: "core::integer::u256" },
+      { name: "created_at", type: "core::integer::u64" },
+      { name: "is_active", type: "core::bool" },
+      {
+        name: "coin_type",
+        type: "core::starknet::contract_address::ContractAddress",
+      },
+    ],
+  },
+  {
+    type: "interface",
+    name: "zkbadge::IZkBadge",
+    items: [
+      {
+        type: "function",
+        name: "verify_honk_proof",
+        inputs: [
+          {
+            name: "full_proof_with_hints",
+            type: "core::array::Span::<core::felt252>",
+          },
+        ],
+        outputs: [
+          { type: "(core::bool, core::array::Span::<core::integer::u256>)" },
+        ],
+        state_mutability: "external",
+      },
+      {
+        type: "function",
+        name: "add_trusted_issuer",
+        inputs: [
+          {
+            name: "issuer",
+            type: "core::starknet::contract_address::ContractAddress",
+          },
+        ],
+        outputs: [],
+        state_mutability: "external",
+      },
+      {
+        type: "function",
+        name: "remove_trusted_issuer",
+        inputs: [
+          {
+            name: "issuer",
+            type: "core::starknet::contract_address::ContractAddress",
+          },
+        ],
+        outputs: [],
+        state_mutability: "external",
+      },
+      {
+        type: "function",
+        name: "register",
+        inputs: [
+          {
+            name: "full_proof_with_hints",
+            type: "core::array::Span::<core::felt252>",
+          },
+        ],
+        outputs: [],
+        state_mutability: "external",
+      },
+      {
+        type: "function",
+        name: "verify_certificate",
+        inputs: [{ name: "hash", type: "core::integer::u256" }],
+        outputs: [],
+        state_mutability: "external",
+      },
+      {
+        type: "function",
+        name: "revoke_certificate",
+        inputs: [{ name: "cert_hash", type: "core::integer::u256" }],
+        outputs: [],
+        state_mutability: "external",
+      },
+      {
+        type: "function",
+        name: "create_feature",
+        inputs: [
+          { name: "name", type: "core::byte_array::ByteArray" },
+          { name: "description", type: "core::byte_array::ByteArray" },
+          { name: "category", type: "core::byte_array::ByteArray" },
+          { name: "image_url", type: "core::byte_array::ByteArray" },
+          { name: "min_age", type: "core::integer::u256" },
+          { name: "price", type: "core::integer::u256" },
+          {
+            name: "coin_type",
+            type: "core::starknet::contract_address::ContractAddress",
+          },
+        ],
+        outputs: [],
+        state_mutability: "external",
+      },
+      {
+        type: "function",
+        name: "access_private_feature",
+        inputs: [
+          { name: "feature_id", type: "core::integer::u64" },
+          {
+            name: "full_proof_with_hints",
+            type: "core::array::Span::<core::felt252>",
+          },
+          {
+            name: "token_contract",
+            type: "core::starknet::contract_address::ContractAddress",
+          },
+        ],
+        outputs: [],
+        state_mutability: "external",
+      },
+      {
+        type: "function",
+        name: "vote_on_feature",
+        inputs: [
+          { name: "feature_id", type: "core::integer::u64" },
+          { name: "like", type: "core::bool" },
+          {
+            name: "full_proof_with_hints",
+            type: "core::array::Span::<core::felt252>",
+          },
+        ],
+        outputs: [],
+        state_mutability: "external",
+      },
+      {
+        type: "function",
+        name: "withdraw_funds",
+        inputs: [
+          { name: "feature_id", type: "core::integer::u64" },
+          {
+            name: "token_contract",
+            type: "core::starknet::contract_address::ContractAddress",
+          },
+        ],
+        outputs: [],
+        state_mutability: "external",
+      },
+      {
+        type: "function",
+        name: "is_certificate_verified",
+        inputs: [{ name: "cert_hash", type: "core::integer::u256" }],
+        outputs: [{ type: "core::bool" }],
+        state_mutability: "view",
+      },
+      {
+        type: "function",
+        name: "get_feature_votes",
+        inputs: [{ name: "feature_id", type: "core::integer::u64" }],
+        outputs: [{ type: "zkbadge::VoteTally" }],
+        state_mutability: "view",
+      },
+      {
+        type: "function",
+        name: "get_feature_info",
+        inputs: [{ name: "feature_id", type: "core::integer::u64" }],
+        outputs: [{ type: "zkbadge::Feature" }],
+        state_mutability: "view",
+      },
+      {
+        type: "function",
+        name: "get_owner_certificate",
+        inputs: [
+          {
+            name: "owner",
+            type: "core::starknet::contract_address::ContractAddress",
+          },
+        ],
+        outputs: [{ type: "core::integer::u256" }],
+        state_mutability: "view",
+      },
+    ],
+  },
+  {
+    type: "constructor",
+    name: "constructor",
+    inputs: [
+      {
+        name: "class_hash",
+        type: "core::starknet::class_hash::ClassHash",
+      },
+    ],
+  },
+  {
+    type: "event",
+    name: "zkbadge::IZkBadgeImpl::CertificateVerifiedEvent",
+    kind: "struct",
+    members: [
+      {
+        name: "caller",
+        type: "core::starknet::contract_address::ContractAddress",
+        kind: "key",
+      },
+      { name: "cert_hash", type: "core::integer::u256", kind: "key" },
+    ],
+  },
+  {
+    type: "event",
+    name: "zkbadge::IZkBadgeImpl::FeatureCreatedEvent",
+    kind: "struct",
+    members: [
+      { name: "feature_id", type: "core::integer::u64", kind: "key" },
+      {
+        name: "creator",
+        type: "core::starknet::contract_address::ContractAddress",
+        kind: "key",
+      },
+    ],
+  },
+  {
+    type: "event",
+    name: "zkbadge::IZkBadgeImpl::FeatureAccessedEvent",
+    kind: "struct",
+    members: [
+      { name: "feature_id", type: "core::integer::u64", kind: "key" },
+      {
+        name: "caller",
+        type: "core::starknet::contract_address::ContractAddress",
+        kind: "key",
+      },
+    ],
+  },
+  {
+    type: "event",
+    name: "zkbadge::IZkBadgeImpl::FeatureVotedEvent",
+    kind: "struct",
+    members: [
+      { name: "feature_id", type: "core::integer::u64", kind: "key" },
+      {
+        name: "caller",
+        type: "core::starknet::contract_address::ContractAddress",
+        kind: "key",
+      },
+      { name: "vote", type: "core::bool", kind: "data" },
+    ],
+  },
+  {
+    type: "event",
+    name: "zkbadge::IZkBadgeImpl::Event",
+    kind: "enum",
+    variants: [
+      {
+        name: "CertificateVerified",
+        type: "zkbadge::IZkBadgeImpl::CertificateVerifiedEvent",
+        kind: "nested",
+      },
+      {
+        name: "FeatureCreated",
+        type: "zkbadge::IZkBadgeImpl::FeatureCreatedEvent",
+        kind: "nested",
+      },
+      {
+        name: "FeatureAccessed",
+        type: "zkbadge::IZkBadgeImpl::FeatureAccessedEvent",
+        kind: "nested",
+      },
+      {
+        name: "FeatureVoted",
+        type: "zkbadge::IZkBadgeImpl::FeatureVotedEvent",
+        kind: "nested",
+      },
+    ],
+  },
+] as const satisfies Abi;
+
+export default contractAbi;

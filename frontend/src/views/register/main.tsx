@@ -1,8 +1,13 @@
 import React, { useMemo, useState } from "react";
-
-import { toast } from "react-toastify";
+import {
+  useAccount,
+  useContract,
+  useSendTransaction,
+} from "@starknet-react/core";
+import { CONTRACT_ADDRESS } from "../../utils/constants";
+import abi from "../../assets/json/abi";
 import { FaSpinner } from "react-icons/fa";
-import type { JsonCertificate } from "../../lib/utils";
+import { toast } from "react-toastify";
 
 function toMsBigIntFromLocalDateTime(value: string): bigint {
   const ms = Date.parse(value);
@@ -53,9 +58,34 @@ export default function RegisterCertForm() {
     setSuccess(null);
     setDownloadData(null);
     setSubmitting(true);
+    const { address, account } = useAccount();
+
+    const { contract } = useContract({
+      abi,
+      address: CONTRACT_ADDRESS,
+    });
+
+    const {
+      isError,
+      error,
+      data,
+      sendAsync: registerUser,
+      isPending: isRegistering,
+    } = useSendTransaction({
+      calls:
+        contract && address ? [contract.populate("register", [])] : undefined,
+    });
 
     try {
+      const transaction = await registerUser();
+
+      if (transaction?.transaction_hash) {
+        console.log("Transaction submitted:", transaction.transaction_hash);
+      }
+      await account?.waitForTransaction(transaction.transaction_hash);
+      toast.success("Points added successfully");
     } catch (err: any) {
+      toast.error(err?.message);
       setError(err?.message ?? String(err));
     } finally {
       setSubmitting(false);
