@@ -1,22 +1,11 @@
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { toast } from "react-toastify";
-import type { JsonCertificate } from "../../lib/utils";
-import {
-  useReadContract,
-  useNetwork,
-  useAccount,
-  useContract,
-  useSendTransaction,
-} from "@starknet-react/core";
+import { useReadContract } from "@starknet-react/core";
 import { CONTRACT_ADDRESS } from "../../utils/constants";
 import abi from "../../assets/json/abi";
-import vkUrl from "../../assets/vk.bin?url";
-import { RpcProvider, Contract } from "starknet";
 
-import React, { useMemo } from "react";
+import React from "react";
 import { poseidon2Hash } from "@zkpassport/poseidon2";
-import { FaSpinner } from "react-icons/fa";
-import { useZkVerifier } from "../../helpers/gen_proof";
 import type { ZkProofInput } from "@/lib/common-types";
 
 const VerifyBadge = () => {
@@ -65,11 +54,7 @@ const VerifyBadge = () => {
       ];
 
       let hash = poseidon2Hash(fields);
-      const {
-        data: isCertVerified,
-        refetch,
-        fetchStatus,
-      } = useReadContract({
+      const { data: isCertVerified } = useReadContract({
         abi: abi,
         functionName: "is_certificate_verified",
         address: CONTRACT_ADDRESS,

@@ -1,6 +1,5 @@
 import React, { useState, useMemo } from "react";
 import { toast } from "react-toastify";
-import { poseidon2Hash } from "@zkpassport/poseidon2";
 import {
   useAccount,
   useContract,
