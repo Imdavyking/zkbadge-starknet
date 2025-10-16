@@ -46,14 +46,17 @@ export function useZkVerifier() {
     const execResult = await noir.execute(input);
 
     console.log("🔒 Generating proof...");
-    const honk = new UltraHonkBackend(circuit.bytecode, { threads: 5 });
+    console.log("Witness:", execResult.witness);
+    // Verify public inputs match
+    console.log("Public inputs:", execResult.returnValue);
+    const honk = new UltraHonkBackend(circuit.bytecode, { threads: 2 });
 
     const proof = await honk.generateProof(execResult.witness, {
       starknet: true,
     });
     honk.destroy();
 
-    console.log("🧩 Preparing callData...");
+    console.log(`🧩 Preparing callData...${proof}`);
     await initGaraga();
     const callData = getHonkCallData(
       proof.proof,
