@@ -54,9 +54,8 @@ deploy-verifier:
 	cd contracts && sncast deploy --salt 0x00 --class-hash 0x061dac032f228abef9c6626f995015233097ae253a7f72d68552db02f2971b8f
 
 artifacts:
-	cp ./circuit/target/circuit.json ./app/src/assets/circuit.json
-	cp ./circuit/target/vk ./app/src/assets/vk.bin
-	cp ./contracts/target/release/verifier_UltraStarknetHonkVerifier.contract_class.json ./app/src/assets/verifier.json
+	cp ./circuit/target/circuit.json ./frontend/src/assets/circuit.json
+	cp ./circuit/target/vk ./frontend/src/assets/vk.bin
 
 run-app:
 	cd app && bun run dev
