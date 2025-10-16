@@ -283,6 +283,8 @@ mod IZkBadgeImpl {
 
             let cert_hash = *public_inputs.at(0);
             let min_age_feature = *public_inputs.at(1);
+            let _issuer = *public_inputs.at(2);
+            let current_time = *public_inputs.at(3);
 
             match self.registered_hashes.entry(cert_hash).read() {
                 Status::Verified(()) => {},
@@ -328,6 +330,8 @@ mod IZkBadgeImpl {
 
             let cert_hash = *public_inputs.at(0);
             let min_age_feature = *public_inputs.at(1);
+            let _issuer = *public_inputs.at(2);
+            let current_time = *public_inputs.at(3);
 
             assert(min_age_feature >= feature.min_age, 'Age verification failed');
 

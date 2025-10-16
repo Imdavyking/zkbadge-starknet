@@ -50,12 +50,7 @@ fn user_certificate(
 }
 
 // Verify certificate signature and freshness using Poseidon2 hash
-fn prove_cert_signed_and_fresh(
-    cert: Certificate,
-    now: u64,
-    caller_pub: [u8; 32],
-    sig: [u8; 64],
-) -> bool {
+fn prove_cert_signed_and_fresh(cert: Certificate, now: u64, caller_pub: [u8; 32]) -> bool {
     let msg_hash = cert_hash(cert);
 
     // Verify ownership
@@ -131,15 +126,15 @@ fn main(
     );
 
     // Verify certificate freshness and ownership
-    let proof_ok = prove_cert_signed_and_fresh(cert, pub_now, pub_caller, sig);
-    assert(proof_ok,"certificate invalid");
+    let proof_ok = prove_cert_signed_and_fresh(cert, pub_now, pub_caller);
+    assert(proof_ok, "certificate invalid");
 
     // Verify certificate Poseidon2 hash matches public input
     let computed_hash = cert_poseidon_hash(cert);
-    assert(computed_hash == pub_hash,"hash doesn't match certificate");
+    assert(computed_hash == pub_hash, "hash doesn't match certificate");
 
     // // Example: check age for a feature requiring 18+
 
     let age_ok = check_age_feature(cert, min_age_feature, current_year);
-    assert(age_ok,"user can not access this");
+    assert(age_ok, "user can not access this");
 }
