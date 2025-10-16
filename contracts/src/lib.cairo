@@ -104,7 +104,7 @@ mod IZkBadgeImpl {
         trusted_issuers: Map<ContractAddress, bool>,
         registered_hashes: Map<u256, Status>,
         protocol_tvl: Map<felt252, u128>,
-        certificate_owners: Map<ContractAddress, felt252>,
+        certificate_owners: Map<ContractAddress, u256>,
         features: Map<u64, Feature>,
         feature_counter: u64,
         access_nullifiers: Map<felt252, bool>,
@@ -134,7 +134,7 @@ mod IZkBadgeImpl {
         #[key]
         caller: ContractAddress,
         #[key]
-        cert_hash: felt252,
+        cert_hash: u256,
     }
 
     #[derive(Drop, starknet::Event)]
@@ -209,6 +209,7 @@ mod IZkBadgeImpl {
                 Status::Pending(()) => {},
                 Status::Verified(()) => { assert(false, 'Already verified'); },
                 Status::Revoked(()) => { assert(false, 'Certificate revoked'); },
+                _ => {},
             }
 
             self.registered_hashes.entry(cert_hash).write(Status::Verified(()));
@@ -219,18 +220,9 @@ mod IZkBadgeImpl {
         }
 
 
-        fn verify_certificates(ref self: ContractState, hashes: Array<felt252>) {
+        fn verify_certificates(ref self: ContractState, hash: u256) {
             assert(get_caller_address() == self.admin.read(), 'Only admin');
-
-            let mut i: usize = 0;
-            loop {
-                if i == hashes.len() {
-                    break;
-                }
-                let hash = *hashes.at(i).unwrap();
-                self.registered_hashes.entry(hash).write(Status::Verified(()));
-                i += 1;
-            };
+            // self.registered_hashes.entry(hash).write(Status::Verified(()));
         }
 
 
