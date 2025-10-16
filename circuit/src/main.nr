@@ -1,5 +1,4 @@
 use dep::poseidon::poseidon2;
-use dep::std;
 
 struct Certificate {
     issuer: [u8; 32],
@@ -51,7 +50,7 @@ fn user_certificate(
 
 // Verify certificate signature and freshness using Poseidon2 hash
 fn prove_cert_signed_and_fresh(cert: Certificate, now: u64, caller_pub: [u8; 32]) -> bool {
-    let msg_hash = cert_hash(cert);
+    let _msg_hash = cert_hash(cert);
 
     // Verify ownership
     assert(cert.owner == caller_pub);
