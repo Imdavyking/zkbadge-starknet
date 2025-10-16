@@ -40,11 +40,11 @@ fn user_certificate(
 }
 
 // Verify certificate signature and freshness using Poseidon2 hash
-fn prove_cert_signed_and_fresh(cert: Certificate, _now: u64, caller_pub: Field) -> bool {
+fn prove_cert_signed_and_fresh(cert: Certificate, _now: u64, owner: Field) -> bool {
     let _msg_hash = cert_hash(cert);
 
     // Verify ownership
-    assert(cert.owner == caller_pub);
+    assert(cert.owner == owner);
     assert(cert.is_valid);
 
     true
@@ -82,7 +82,7 @@ fn main(
     min_age_feature: pub u16,
     access_nullifier: pub Field,
     now: pub u64,
-    caller: pub Field,
+    owner: pub Field,
     current_year: pub u16,
 ) {
     let cert = user_certificate(
@@ -90,12 +90,12 @@ fn main(
         issued_at,
         valid_until,
         is_valid,
-        caller,
+        owner,
         year_of_birth,
     );
 
     // Verify certificate freshness and ownership
-    let proof_ok = prove_cert_signed_and_fresh(cert, now, caller);
+    let proof_ok = prove_cert_signed_and_fresh(cert, now, owner);
     assert(proof_ok, "certificate invalid");
 
     // Verify certificate Poseidon2 hash matches public input

@@ -10,5 +10,5 @@ hash = "0x123456789abcdef123456789abcdef123456789abcdef123456789abcdef"
 min_age_feature = 18
 access_nullifier = "0x2fc58b7057524576a4cec4a9b6be09de"
 now = 1704067200
-caller = "0x057524576a4cec4a2fc58b79b6be09de"
+owner = "0x057524576a4cec4a2fc58b79b6be09de"
 current_year = 2025
