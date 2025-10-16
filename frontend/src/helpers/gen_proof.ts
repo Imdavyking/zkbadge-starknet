@@ -46,7 +46,7 @@ export function useZkVerifier() {
     const execResult = await noir.execute(input);
 
     console.log("🔒 Generating proof...");
-    const honk = new UltraHonkBackend(circuit.bytecode, { threads: 5 });
+    const honk = new UltraHonkBackend(circuit.bytecode, { threads: 2 });
 
     const proof = await honk.generateProof(execResult.witness, {
       starknet: true,
