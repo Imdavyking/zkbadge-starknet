@@ -56,24 +56,6 @@ export default function CreateFeatureForm() {
         address: CONTRACT_ADDRESS,
       });
 
-      // const txData = await deploymentContext?.zkBadgeApi?.create_feature(
-      //   featureName,
-      //   BigInt(minAge),
-      //   description,
-      //   category,
-      //   imageUrl,
-      //   BigInt(price),
-      //   BigInt(Date.parse(createdAt)),
-      //   nativeToken()
-      // );
-
-      //  name: ByteArray,
-      // description: ByteArray,
-      // category: ByteArray,
-      // image_url: ByteArray,
-      // min_age: u256,
-      // price: u256,
-      // coin_type: ContractAddress,
       const { sendAsync: createFeature } = useSendTransaction({
         calls:
           contract && address

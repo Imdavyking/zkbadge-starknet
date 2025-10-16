@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
 import type { JsonCertificate } from "../../lib/utils";
 import {
+  useReadContract,
+  useNetwork,
   useAccount,
   useContract,
   useSendTransaction,
@@ -11,11 +13,17 @@ import abi from "../../assets/json/abi";
 import vkUrl from "../../assets/vk.bin?url";
 import { RpcProvider, Contract } from "starknet";
 
+import React, { useMemo } from "react";
+import { poseidon2Hash } from "@zkpassport/poseidon2";
+import { FaSpinner } from "react-icons/fa";
+import { useZkVerifier } from "../../helpers/gen_proof";
+import type { ZkProofInput } from "@/lib/common-types";
+
 const VerifyBadge = () => {
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState("");
   const [error, setError] = useState("");
-  const [certJson, setCertJson] = useState<JsonCertificate | null>(null);
+  const [certJson, setCertJson] = useState<ZkProofInput | null>(null);
 
   // Handle user uploading JSON file
   const handleFileUpload = async (
@@ -47,6 +55,31 @@ const VerifyBadge = () => {
     setStatus("");
 
     try {
+      const fields = [
+        BigInt(certJson.issuer),
+        BigInt(certJson.issued_at),
+        BigInt(certJson.valid_until),
+        BigInt(certJson.is_valid),
+        BigInt(certJson.owner),
+        BigInt(certJson.year_of_birth),
+      ];
+
+      let hash = poseidon2Hash(fields);
+      const {
+        data: isCertVerified,
+        refetch,
+        fetchStatus,
+      } = useReadContract({
+        abi: abi,
+        functionName: "is_certificate_verified",
+        address: CONTRACT_ADDRESS,
+        args: [hash],
+        watch: true,
+      });
+      if (isCertVerified) {
+        toast.success("Certificate verified successfully!");
+        setStatus("✅ Certificate is valid.");
+      }
     } catch (err: any) {
       console.error(err);
       setError("❌ Verification failed. " + (err?.message ?? ""));
