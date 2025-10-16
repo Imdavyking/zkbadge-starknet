@@ -115,7 +115,7 @@ export default function RegisterCertForm() {
         issuer: `0x${input.issuer.toString(16)}`,
         issued_at: `0x${input.issued_at.toString(16)}`,
         valid_until: `0x${input.valid_until.toString(16)}`,
-        is_valid: `0x${input.is_valid.toString(16)}`,
+        is_valid: true,
         secret: `0x${input.secret.toString(16)}`,
         year_of_birth: `0x${input.year_of_birth.toString(16)}`,
         hash: `0x${hash.toString(16)}`,
