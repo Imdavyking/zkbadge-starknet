@@ -93,51 +93,46 @@ const VerifyBadge = () => {
     setStatus("");
 
     try {
-      const { contract } = useContract({
-        abi,
-        address: CONTRACT_ADDRESS,
-      });
-      updateState(ProofState.GeneratingWitness);
-
-      // Use input values from state
-      const input = { x: inputX, y: inputY };
-
-      // Generate witness
-      let noir = new Noir({ bytecode, abi: abi as any });
-      let execResult = await noir.execute(input);
-      console.log(execResult);
-
-      // Generate proof
-      updateState(ProofState.GeneratingProof);
-
-      let honk = new UltraHonkBackend(bytecode, { threads: 2 });
-      let proof = await honk.generateProof(execResult.witness, {
-        starknet: true,
-      });
-      honk.destroy();
-      console.log(proof);
-      await init();
-      const callData = getHonkCallData(
-        proof.proof,
-        flattenFieldsAsArray(proof.publicInputs),
-        vk as Uint8Array,
-        1 // HonkFlavor.STARKNET
-      );
-      const provider = new RpcProvider({
-        nodeUrl: "http://127.0.0.1:5050/rpc",
-      });
-      const contractAddress =
-        "0x02b76ac09aea8957666f0fb3409b091e2bdca99700273af44358bd2ed0e14a32";
-      const verifierContract = new Contract(
-        verifierAbi,
-        contractAddress,
-        provider
-      );
-
-      // Check verification
-      const res = await verifierContract.verify_ultra_starknet_honk_proof(
-        callData.slice(1)
-      );
+      // // const { contract } = useContract({
+      // //   abi,
+      // //   address: CONTRACT_ADDRESS,
+      // // });
+      // updateState(ProofState.GeneratingWitness);
+      // // Use input values from state
+      // const input = { x: inputX, y: inputY };
+      // // Generate witness
+      // let noir = new Noir({ bytecode, abi: abi as any });
+      // let execResult = await noir.execute(input);
+      // console.log(execResult);
+      // // Generate proof
+      // updateState(ProofState.GeneratingProof);
+      // let honk = new UltraHonkBackend(bytecode, { threads: 2 });
+      // let proof = await honk.generateProof(execResult.witness, {
+      //   starknet: true,
+      // });
+      // honk.destroy();
+      // console.log(proof);
+      // await init();
+      // const callData = getHonkCallData(
+      //   proof.proof,
+      //   flattenFieldsAsArray(proof.publicInputs),
+      //   vk as Uint8Array,
+      //   1 // HonkFlavor.STARKNET
+      // );
+      // const provider = new RpcProvider({
+      //   nodeUrl: "http://127.0.0.1:5050/rpc",
+      // });
+      // const contractAddress =
+      //   "0x02b76ac09aea8957666f0fb3409b091e2bdca99700273af44358bd2ed0e14a32";
+      // // const verifierContract = new Contract(
+      // //   verifierAbi,
+      // //   contractAddress,
+      // //   provider
+      // // );
+      // // // Check verification
+      // // const res = await verifierContract.verify_ultra_starknet_honk_proof(
+      // //   callData.slice(1)
+      // // );
     } catch (err: any) {
       console.error(err);
       setError("❌ Verification failed. " + (err?.message ?? ""));
