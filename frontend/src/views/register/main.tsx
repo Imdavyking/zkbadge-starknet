@@ -126,8 +126,6 @@ export default function RegisterCertForm() {
         current_year: `0x${input.current_year.toString(16)}`,
       };
 
-      console.log(zk_data);
-
       const { callData } = await generateProof(zk_data);
 
       const {
