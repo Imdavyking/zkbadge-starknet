@@ -67,28 +67,32 @@ const ViewFeatures: React.FC = () => {
   );
 
   useEffect(() => {
+    if (features.length > 0) return;
     const datas: FeatureJson[] = [];
     results.forEach(({ data, error }, i) => {
       if (error) console.error(`Error reading feature ${i}:`, error);
-      console.log(data);
-        if (data && data?.creator !== "") {
-          datas.push({
-            id: i.toString(),
-            creator: data.creator,
-            name: data.name,
-            description: data.description,
-            category: data.category,
-            image_url: data.image_url,
-            min_age: Number(data.min_age), // ✅ convert
-            price: Number(data.price), // ✅ convert
-            created_at: Number(data.created_at), // ✅ convert
-            is_active: data.is_active,
-            coin_type: data.coin_type,
-          });
-        }
+      if (data) {
+        console.log(`Feature ${i}:`, data);
+      }
+      if (data && data?.is_active) {
+        datas.push({
+          id: i.toString(),
+          creator: data.creator,
+          name: data.name,
+          description: data.description,
+          category: data.category,
+          image_url: data.image_url,
+          min_age: Number(data.min_age), // ✅ convert
+          price: Number(data.price), // ✅ convert
+          created_at: Number(data.created_at), // ✅ convert
+          is_active: data.is_active,
+          coin_type: data.coin_type,
+        });
+      }
+      setFeatures(datas);
+      setLoading(false);
     });
-    setFeatures(datas);
-  }, []);
+  }, [results]);
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">

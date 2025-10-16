@@ -88,14 +88,14 @@ export const Feature = (feature: FeatureJson) => {
           💰{" "}
           {feature.price > 0
             ? `${feature.price} ${
-                NATIVE_TOKEN == feature.coin_type ? "tDUST" : "Unknown Token"
+                NATIVE_TOKEN == feature.coin_type ? "STRK" : "Unknown Token"
               }`
             : "Free"}
         </span>
       </div>
 
       <div className="flex justify-between items-center text-xs text-gray-400">
-        <span>By {ellipsify(feature.creator)}</span>
+        <span>By {ellipsify(`0x${BigInt(feature.creator).toString(16)}`)}</span>
         <span>{new Date(feature.created_at).toLocaleDateString()}</span>
       </div>
 
