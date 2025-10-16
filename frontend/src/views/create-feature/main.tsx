@@ -74,7 +74,7 @@ export default function CreateFeatureForm() {
       // min_age: u256,
       // price: u256,
       // coin_type: ContractAddress,
-      const { sendAsync: registerUser } = useSendTransaction({
+      const { sendAsync: createFeature } = useSendTransaction({
         calls:
           contract && address
             ? [
@@ -90,13 +90,13 @@ export default function CreateFeatureForm() {
               ]
             : undefined,
       });
-      const transaction = await registerUser();
+      const transaction = await createFeature();
 
       if (transaction?.transaction_hash) {
         console.log("Transaction submitted:", transaction.transaction_hash);
       }
       await account?.waitForTransaction(transaction.transaction_hash);
-      toast.success("Registered successfully");
+      toast.success("Feature created successfully");
     } catch (err: any) {
       setError(err?.message ?? String(err));
     } finally {
