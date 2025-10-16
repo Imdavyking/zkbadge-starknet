@@ -52,6 +52,21 @@ ZkBadge enables creators to publish age-restricted content and features while us
 - Python/pip for Garaga
 - [asdf](https://asdf-vm.com/) version manager
 
+# Usage
+
+Deploy:
+
+```
+scarb build
+yarn deploy
+```
+
+## Testing
+
+```
+scarb test
+```
+
 ## 🛠️ Installation & Setup
 
 ### 1. Clone & Install Dependencies
