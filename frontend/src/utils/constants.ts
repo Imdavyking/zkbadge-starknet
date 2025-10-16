@@ -1,5 +1,5 @@
 /// <reference types="vite/client" />
-import { RpcProvider, constants } from "starknet";
+import { constants } from "starknet";
 
 export const CONTRACT_ADDRESS = import.meta.env.VITE_CONTRACT_ADDRESS;
 export const NATIVE_TOKEN =
