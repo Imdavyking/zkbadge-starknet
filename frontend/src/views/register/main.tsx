@@ -41,8 +41,9 @@ export default function RegisterCertForm() {
   const [validUntil, setValidUntil] = useState(currentISOForInput(24 * 30));
   const [isValid, setIsValid] = useState(true);
   const [yob, setYob] = useState(1999);
-  const [issuerHex, setIssuerHex] = useState(randomNonceBytesHex(32));
+  const [issuerHex, setIssuerHex] = useState(randomNonceBytesHex(8));
   const { address, account } = useAccount();
+  const { generateProof } = useZkVerifier();
 
   const { contract } = useContract({
     abi,
@@ -80,13 +81,14 @@ export default function RegisterCertForm() {
     setSubmitting(true);
 
     try {
+      const secretHex = randomNonceBytesHex(8);
       const input = {
         issuer: BigInt(issuerHex),
         issued_at: toMsBigIntFromLocalDateTime(issuedAt),
         valid_until: toMsBigIntFromLocalDateTime(validUntil),
         is_valid: 1n,
         year_of_birth: BigInt(yob),
-        secret: BigInt(randomNonceBytesHex(32)),
+        secret: BigInt(secretHex),
         min_age_feature: 0n,
         now: BigInt(new Date().getMilliseconds()),
         owner: BigInt(address ?? 0),
@@ -104,13 +106,25 @@ export default function RegisterCertForm() {
 
       // Chain poseidon2 hashes just like in Cairo
       let hash = poseidon2Hash(fields);
-      const zk_data = {
-        cert_hash: "0x" + hash.toString(16),
-        access_nullifier_hash:
-          "0x" + poseidon2Hash([hash, input.secret]).toString(16),
-      };
+      let accessNullifierHash = `0x${poseidon2Hash([
+        hash,
+        input.secret,
+      ]).toString(16)}`;
 
-      console.log(zk_data);
+      const { callData } = await generateProof({
+        issuer: `0x${input.issuer.toString(16)}`,
+        issued_at: `0x${input.issued_at.toString(16)}`,
+        valid_until: `0x${input.valid_until.toString(16)}`,
+        is_valid: `0x${input.is_valid.toString(16)}`,
+        secret: `0x${input.secret.toString(16)}`,
+        year_of_birth: `0x${input.year_of_birth.toString(16)}`,
+        hash: `0x${hash.toString(16)}`,
+        min_age_feature: "0x00",
+        access_nullifier: accessNullifierHash,
+        now: `0x${input.now.toString(16)}`,
+        owner: `0x${input.owner.toString(16)}`,
+        current_year: `0x${input.current_year.toString(16)}`,
+      });
 
       // const {
       //   isError,
