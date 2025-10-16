@@ -78,16 +78,6 @@ fn gen_access_nullifier(cert: Certificate, secret: Field) -> Field {
     poseidon2::Poseidon2::hash(inputs, inputs.len())
 }
 
-// Generate vote nullifier using Poseidon2
-fn gen_vote_nullifier(cert: Certificate, feature_id: u64, salt: [u8; 32]) -> Field {
-    let cert_hash_field = cert_hash(cert);
-    let feature_field = feature_id as Field;
-    let salt_field = bytes32_to_field(salt);
-
-    let inputs = [cert_hash_field, feature_field, salt_field];
-    poseidon2::Poseidon2::hash(inputs, inputs.len())
-}
-
 // Poseidon2 hash of certificate for public verification
 fn cert_poseidon_hash(cert: Certificate) -> Field {
     cert_hash(cert)
