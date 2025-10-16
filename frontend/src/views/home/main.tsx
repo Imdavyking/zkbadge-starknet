@@ -7,7 +7,7 @@ const Home = () => {
       <header className="text-center px-6 pt-20 pb-12 bg-gradient-to-r from-indigo-800 via-purple-700 to-blue-700 text-white">
         <h1 className="text-5xl font-bold mb-4">ZK Badge</h1>
         <p className="text-xl max-w-2xl mx-auto">
-          A privacy-preserving identity verification system powered by Midnight.
+          A privacy-preserving identity verification system powered by Noir.
           Prove who you are — without revealing who you are.
         </p>
         <Link
@@ -78,7 +78,7 @@ const Home = () => {
 
       {/* Footer */}
       <footer className="bg-white text-center py-8 border-t text-sm text-gray-500">
-        © {new Date().getFullYear()} ZK Badge • Built with Midnight & Zero
+        © {new Date().getFullYear()} ZK Badge • Built with Noir & Cairo
         Knowledge
       </footer>
     </div>
