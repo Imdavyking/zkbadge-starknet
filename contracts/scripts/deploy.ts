@@ -18,15 +18,15 @@ async function main() {
   // Declare & deploy contract
   let sierraCode,
     casmCode,
-    sierraCodeLifeSourceManager,
-    casmCodLifeSourceManager;
+    zkbadgeManager,
+    casmCodZkbagdeManager;
 
   try {
-    ({ sierraCode, casmCode } = await getCompiledCode("life_source_ERC20"));
+    ({ sierraCode, casmCode } = await getCompiledCode("verifier_UltraStarknetHonkVerifier"));
     ({
-      sierraCode: sierraCodeLifeSourceManager,
-      casmCode: casmCodLifeSourceManager,
-    } = await getCompiledCode("life_source_LifeSourceManager"));
+      sierraCode: zkbadgeManager,
+      casmCode: casmCodZkbagdeManager,
+    } = await getCompiledCode("zkbadge_IZkBadgeImpl"));
   } catch (error: any) {
     console.log("Failed to read contract files");
     console.log(error);
@@ -38,27 +38,27 @@ async function main() {
     casm: casmCode,
   });
 
-  const myCallDataLifeSource = new CallData(sierraCodeLifeSourceManager.abi);
+  const myCallDataZkBadge = new CallData(zkbadgeManager.abi);
 
-  const constructorLifeSource = myCallDataLifeSource.compile("constructor", {
+  const constructorZkBadge = myCallDataZkBadge.compile("constructor", {
     class_hash: declareResponse.class_hash,
   });
 
   const deployResponse = await account0.declareAndDeploy({
-    contract: sierraCodeLifeSourceManager,
-    casm: casmCodLifeSourceManager,
-    constructorCalldata: constructorLifeSource,
+    contract: zkbadgeManager,
+    casm: casmCodZkbagdeManager,
+    constructorCalldata: constructorZkBadge,
     salt: stark.randomAddress(),
   });
 
   // Connect the new contract instance :
-  const lifeSourceContract = new Contract(
-    sierraCodeLifeSourceManager.abi,
+  const zkBadgeContract = new Contract(
+    zkbadgeManager.abi,
     deployResponse.deploy.contract_address,
     provider
   );
   console.log(
-    `✅ Contract has been deploy with the address: ${lifeSourceContract.address}`
+    `✅ Contract has been deploy with the address: ${zkBadgeContract.address}`
   );
 }
 main()
