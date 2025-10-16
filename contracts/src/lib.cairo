@@ -324,8 +324,11 @@ mod IZkBadgeImpl {
             like: bool,
             full_proof_with_hints: Span<felt252>,
         ) {
+            let caller = get_caller_address();
+            let user_access = self.user_feature_access.entry((caller, feature_id));
             let (is_valid, public_inputs) = verify_honk_proof(full_proof_with_hints);
             assert(is_valid, 'Invalid proof');
+            assert(user_access.read(), 'user dont have access yet');
             let feature = self.features.entry(feature_id).read();
 
             let cert_hash = *public_inputs.at(0);
