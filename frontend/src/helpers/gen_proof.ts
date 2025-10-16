@@ -40,10 +40,7 @@ export function useZkVerifier() {
   const generateProof = async (input: Record<string, any>) => {
     if (!vk) throw new Error("Verifier not initialized yet");
 
-    let noir = new Noir({
-      bytecode: circuit.bytecode,
-      abi: circuit.abi as any,
-    });
+    let noir = new Noir(circuit as CompiledCircuit);
 
     console.log("🧮 Generating witness...");
     const execResult = await noir.execute(input);
