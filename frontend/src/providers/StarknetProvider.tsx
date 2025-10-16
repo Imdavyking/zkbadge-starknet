@@ -1,52 +1,94 @@
-"use client";
-import { sepolia, mainnet } from "@starknet-react/chains";
+import { ARGENT_WEBWALLET_URL, CHAIN_ID } from "../utils/constants";
 import {
-  alchemyProvider,
-  argent,
-  braavos,
-  infuraProvider,
-  lavaProvider,
-  StarknetConfig,
-  starkscan,
-  useInjectedConnectors,
-} from "@starknet-react/core";
-import React from "react";
-import { ArgentMobileConnector } from "starknetkit/argentMobile";
+  isInArgentMobileAppBrowser,
+  ArgentMobileConnector,
+} from "starknetkit/argentMobile";
+import {
+  isInKeplrMobileAppBrowser,
+  KeplrMobileConnector,
+} from "starknetkit/keplrMobile";
+import {
+  BraavosMobileConnector,
+  isInBraavosMobileAppBrowser,
+} from "starknetkit/braavosMobile";
+import { InjectedConnector } from "starknetkit/injected";
 import { WebWalletConnector } from "starknetkit/webwallet";
+import { ControllerConnector } from "starknetkit/controller";
+import { getStarknet } from "@starknet-io/get-starknet-core";
+import { StarknetConfig, publicProvider } from "@starknet-react/core";
+import { mainnet, sepolia } from "@starknet-react/chains";
 
-const apiKey = import.meta.env.VITE_PUBLIC_API_KEY;
-const nodeProvider = import.meta.env.VITE_PUBLIC_PROVIDER;
+const isMobileDevice = () => {
+  if (typeof window === "undefined") {
+    return false;
+  }
+  getStarknet();
+  // Primary method: User Agent + Touch support check
+  const userAgent = navigator.userAgent.toLowerCase();
+  const isMobileUA =
+    /android|webos|iphone|ipad|ipod|blackberry|windows phone/.test(userAgent);
+  const hasTouchSupport =
+    "ontouchstart" in window || navigator.maxTouchPoints > 0;
+
+  // Backup method: Screen size
+  const isSmallScreen = window.innerWidth <= 768;
+
+  // Combine checks: Must match user agent AND (touch support OR small screen)
+  return isMobileUA && (hasTouchSupport || isSmallScreen);
+};
+
+export const availableConnectors = () => {
+  if (isInArgentMobileAppBrowser()) {
+    return [
+      ArgentMobileConnector.init({
+        options: {
+          url: typeof window !== "undefined" ? window.location.href : "",
+          dappName: "Example dapp",
+          chainId: CHAIN_ID,
+        },
+      }),
+    ];
+  }
+
+  if (isInKeplrMobileAppBrowser()) {
+    return [KeplrMobileConnector.init()];
+  }
+
+  if (isInBraavosMobileAppBrowser()) {
+    return [BraavosMobileConnector.init({})];
+  }
+
+  return [
+    new InjectedConnector({ options: { id: "argentX" } }),
+    new InjectedConnector({ options: { id: "braavos" } }),
+    new InjectedConnector({ options: { id: "metamask" } }),
+    new ControllerConnector(),
+    ArgentMobileConnector.init({
+      options: {
+        url: typeof window !== "undefined" ? window.location.href : "",
+        dappName: "Example dapp",
+        chainId: CHAIN_ID,
+      },
+    }),
+    isMobileDevice() ? BraavosMobileConnector.init({}) : null,
+    new WebWalletConnector({ url: ARGENT_WEBWALLET_URL, theme: "dark" }),
+  ].filter((connector) => connector !== null);
+};
+
+const connectors = availableConnectors();
 
 interface StarknetProviderProps {
   children: React.ReactNode;
 }
 
 export function StarknetProvider({ children }: StarknetProviderProps) {
-  const { connectors: injected } = useInjectedConnectors({
-    recommended: [argent(), braavos()],
-    includeRecommended: "always",
-  });
+  const providers = publicProvider();
 
-  const connectors = [
-    ...injected,
-    new WebWalletConnector({ url: "https://web.argent.xyz" }),
-    new ArgentMobileConnector(),
-  ];
-
-  let provider;
-  if (nodeProvider == "infura") {
-    provider = infuraProvider({ apiKey });
-  } else if (nodeProvider == "alchemy") {
-    provider = alchemyProvider({ apiKey });
-  } else if (nodeProvider == "lava") {
-    provider = lavaProvider({ apiKey });
-  }
   return (
     <StarknetConfig
       connectors={connectors as any[]}
       chains={[mainnet, sepolia]}
-      provider={provider as any}
-      explorer={starkscan}
+      provider={providers as any}
       autoConnect
     >
       {children}
