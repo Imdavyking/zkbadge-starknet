@@ -86,13 +86,13 @@ export default function RegisterCertForm() {
         issuer: BigInt(issuerHex),
         issued_at: toMsBigIntFromLocalDateTime(issuedAt),
         valid_until: toMsBigIntFromLocalDateTime(validUntil),
-        is_valid: 1n,
+        is_valid: BigInt(isValid),
         year_of_birth: BigInt(yob),
         secret: BigInt(secretHex),
         min_age_feature: 0n,
         now: BigInt(new Date().getMilliseconds()),
         owner: BigInt(address ?? 0),
-        current_year: 2025n,
+        current_year: new Date().getFullYear(),
       };
 
       const fields = [
@@ -115,7 +115,7 @@ export default function RegisterCertForm() {
         issuer: `0x${input.issuer.toString(16)}`,
         issued_at: `0x${input.issued_at.toString(16)}`,
         valid_until: `0x${input.valid_until.toString(16)}`,
-        is_valid: true,
+        is_valid: input.is_valid,
         secret: `0x${input.secret.toString(16)}`,
         year_of_birth: yob,
         hash: `0x${hash.toString(16)}`,
@@ -126,7 +126,7 @@ export default function RegisterCertForm() {
         current_year: 2025,
       };
 
-      console.log(zk_data)
+      console.log(zk_data);
 
       const { callData } = await generateProof(zk_data);
 
