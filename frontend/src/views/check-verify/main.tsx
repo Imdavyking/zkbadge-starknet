@@ -13,13 +13,13 @@ import { UltraHonkBackend } from "@aztec/bb.js";
 import { flattenFieldsAsArray } from "../../helpers/proof";
 import { getHonkCallData, init } from "garaga";
 import { bytecode, abi as circuitAbi } from "../../assets/circuit.json";
-import vkUrl from "./assets/vk.bin?url";
+import vkUrl from "../../assets/vk.bin?url";
 import { RpcProvider, Contract } from "starknet";
 import initNoirC from "@noir-lang/noirc_abi";
 import initACVM from "@noir-lang/acvm_js";
 import acvm from "@noir-lang/acvm_js/web/acvm_js_bg.wasm?url";
 import noirc from "@noir-lang/noirc_abi/web/noirc_abi_wasm_bg.wasm?url";
-import { ProofState, type ProofStateData } from "@/types";
+import { ProofState, type ProofStateData } from "../../types";
 
 const VerifyBadge = () => {
   const [loading, setLoading] = useState(false);
