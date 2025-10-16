@@ -3,7 +3,7 @@ import { constants } from "starknet";
 
 export const CONTRACT_ADDRESS = import.meta.env.VITE_CONTRACT_ADDRESS;
 export const NATIVE_TOKEN =
-  "0x0000000000000000000000000000000000000000000000000000000000000000";
+  "0x4718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d";
 export const CHAIN_ID = constants.NetworkName.SN_SEPOLIA;
 export const ARGENT_WEBWALLET_URL =
   process.env.NEXT_PUBLIC_ARGENT_WEBWALLET_URL ||

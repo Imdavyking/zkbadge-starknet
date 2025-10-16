@@ -10,7 +10,6 @@ import abi from "../../assets/json/abi";
 import { FaSpinner } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { useZkVerifier } from "../../helpers/gen_proof";
-import { ProofState, type ProofStateData } from "../../types";
 
 function toMsBigIntFromLocalDateTime(value: string): bigint {
   const ms = Date.parse(value);
@@ -130,13 +129,7 @@ export default function RegisterCertForm() {
 
       const { callData } = await generateProof(zk_data);
 
-      const {
-        isError,
-        error,
-        data,
-        sendAsync: registerUser,
-        isPending: isRegistering,
-      } = useSendTransaction({
+      const { sendAsync: registerUser } = useSendTransaction({
         calls:
           contract && address
             ? [contract.populate("register", [callData.slice(1)])]
