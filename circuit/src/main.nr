@@ -113,7 +113,6 @@ fn main(
     valid_until: u64,
     is_valid: bool,
     year_of_birth: u16,
-    sig: [u8; 64],
     // Public inputs
     pub_hash: pub Field,
     min_age_feature: pub u16,

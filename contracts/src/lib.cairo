@@ -9,7 +9,7 @@ struct Feature {
     category: ByteArray,
     image_url: ByteArray,
     min_age: u256,
-    price: u64,
+    price: u256,
     created_at: u64,
     is_active: bool,
     coin_type: ContractAddress,
@@ -109,10 +109,9 @@ mod IZkBadgeImpl {
         certificate_owners: Map<ContractAddress, u256>,
         features: Map<u64, Feature>,
         feature_counter: u64,
-        access_nullifiers: Map<u256, bool>,
-        vote_nullifiers: Map<u256, bool>,
         feature_vote_tallies: Map<u64, VoteTally>,
         verified_users: Map<ContractAddress, bool>,
+        user_feature_access: Map<(ContractAddress, u64), bool>,
     }
 
     #[constructor]
@@ -240,7 +239,7 @@ mod IZkBadgeImpl {
             description: ByteArray,
             category: ByteArray,
             image_url: ByteArray,
-            min_age: u16,
+            min_age: u256,
             price: u64,
             coin_type: ContractAddress,
         ) {
@@ -277,6 +276,9 @@ mod IZkBadgeImpl {
             full_proof_with_hints: Span<felt252>,
             token_contract: ContractAddress,
         ) {
+            let caller = get_caller_address();
+            let user_access = self.user_feature_access.entry((caller, feature_id));
+            assert(!user_access.read(), 'Invalid proof');
             let (is_valid, public_inputs) = verify_honk_proof(full_proof_with_hints);
             assert(is_valid, 'Invalid proof');
 
@@ -284,32 +286,32 @@ mod IZkBadgeImpl {
             assert(feature.is_active, 'Feature inactive');
 
             let cert_hash = *public_inputs.at(0);
-            let age_ok_flag = *public_inputs.at(1);
+            let min_age_feature = *public_inputs.at(1);
 
             match self.registered_hashes.entry(cert_hash).read() {
                 Status::Verified(()) => {},
                 _ => { assert(false, 'Cert not verified'); },
             }
-            assert(age_ok_flag >= feature.min_age, 'Age verification failed');
-            // assert(!self.access_nullifiers.entry(access_nullifier).read(), 'Already accessed');
+            assert(min_age_feature >= feature.min_age, 'Age verification failed');
+            user_access.write(true);
 
-            // if feature.price > 0 {
-        //     let payment_amount = u256 { low: feature.price.into(), high: 0 };
-        //     let erc20 = IERC20Dispatcher { contract_address: token_contract };
-        //     let success = erc20
-        //         .transfer_from(get_caller_address(), get_contract_address(), payment_amount);
-        //     assert(success, 'Payment failed');
+            if feature.price > 0 {
+                let erc20 = IERC20Dispatcher { contract_address: token_contract };
+                let success = erc20
+                    .transfer_from(get_caller_address(), get_contract_address(), feature.price);
+                assert(success, 'Payment failed');
+                // let current_balance = self.feature_balances.entry(feature_id).read();
+            // self
+            //     .feature_balances
+            //     .entry(feature_id)
+            //     .write(current_balance + feature.price.into());
 
-            //     let current_balance = self.feature_balances.entry(feature_id).read();
-        //     self
-        //         .feature_balances
-        //         .entry(feature_id)
-        //         .write(current_balance + feature.price.into());
-
-            //     let current_tvl = self.protocol_tvl.entry(feature.coin_type).read();
-        //     self.protocol_tvl.write(feature.coin_type, current_tvl + feature.price.into());
-        // }
-
+                // let current_tvl = self.protocol_tvl.entry(feature.coin_type).read();
+            // self
+            //     .protocol_tvl
+            //     .entry(feature.coin_type)
+            //     .write(current_tvl + feature.price.into());
+            }
             // self.access_nullifiers.write(access_nullifier, true);
         // self
         //     .emit(
@@ -328,18 +330,17 @@ mod IZkBadgeImpl {
         ) {
             let (is_valid, public_inputs) = verify_honk_proof(full_proof_with_hints);
             assert(is_valid, 'Invalid proof');
+            let feature = self.features.entry(feature_id).read();
 
             let cert_hash = *public_inputs.at(0);
-            let vote_nullifier = *public_inputs.at(1);
+            let min_age_feature = *public_inputs.at(1);
+
+            assert(min_age_feature >= feature.min_age, 'Age verification failed');
 
             match self.registered_hashes.entry(cert_hash).read() {
                 Status::Verified(()) => {},
                 _ => { assert(false, 'Cert not verified'); },
             }
-            assert(self.access_nullifiers.entry(access_nullifier).read(), 'Must access first');
-            assert(!self.vote_nullifiers.entry(vote_nullifier).read(), 'Already voted');
-
-            self.vote_nullifiers.entry(vote_nullifier).write(true);
 
             let mut tally = self.feature_vote_tallies.entry(feature_id).read();
             if like {
