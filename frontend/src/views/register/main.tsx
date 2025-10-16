@@ -44,10 +44,18 @@ export default function RegisterCertForm() {
   const [issuerHex, setIssuerHex] = useState(randomNonceBytesHex(8));
   const { address, account } = useAccount();
   const { generateProof } = useZkVerifier();
+  const [callData, setCallData] = useState<any[]>([]);
 
   const { contract } = useContract({
     abi,
     address: CONTRACT_ADDRESS,
+  });
+
+  const { sendAsync: registerUser } = useSendTransaction({
+    calls:
+      contract && address
+        ? [contract.populate("register", [callData.slice(1)])]
+        : undefined,
   });
 
   const [submitting, setSubmitting] = useState(false);
@@ -131,14 +139,10 @@ export default function RegisterCertForm() {
         current_year: Number(input.current_year),
       };
 
-      const { callData } = await generateProof(zk_data);
+      const { callData: proofCallData } = await generateProof(zk_data);
 
-      const { sendAsync: registerUser } = useSendTransaction({
-        calls:
-          contract && address
-            ? [contract.populate("register", [callData.slice(1)])]
-            : undefined,
-      });
+      setCallData(proofCallData);
+
       const transaction = await registerUser();
 
       if (transaction?.transaction_hash) {
