@@ -117,7 +117,7 @@ export default function RegisterCertForm() {
         valid_until: `0x${input.valid_until.toString(16)}`,
         is_valid: true,
         secret: `0x${input.secret.toString(16)}`,
-        year_of_birth: 2001,
+        year_of_birth: yob,
         hash: `0x${hash.toString(16)}`,
         min_age_feature: 0,
         access_nullifier: accessNullifierHash,
@@ -125,6 +125,8 @@ export default function RegisterCertForm() {
         owner: `0x${input.owner.toString(16)}`,
         current_year: 2025,
       };
+
+      console.log(zk_data)
 
       const { callData } = await generateProof(zk_data);
 

@@ -44,8 +44,8 @@ fn prove_cert_signed_and_fresh(cert: Certificate, _now: u64, owner: Field) -> bo
     let _msg_hash = cert_hash(cert);
 
     // Verify ownership
-    assert(cert.owner == owner);
-    assert(cert.is_valid);
+    assert(cert.owner == owner,"not owner");
+    assert(cert.is_valid,"cert is not valid");
 
     true
 }
