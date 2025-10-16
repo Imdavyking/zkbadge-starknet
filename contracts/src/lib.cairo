@@ -45,8 +45,8 @@ pub trait IZkBadge<TContractState> {
         description: ByteArray,
         category: ByteArray,
         image_url: ByteArray,
-        min_age: u16,
-        price: u64,
+        min_age: u256,
+        price: u256,
         coin_type: ContractAddress,
     );
     fn access_private_feature(
@@ -70,13 +70,9 @@ pub trait IZkBadge<TContractState> {
 #[starknet::contract]
 mod IZkBadgeImpl {
     use core::array::ArrayTrait;
-    use core::circuit::u384;
-    use core::num::traits::Zero;
-    use garaga::hashes::poseidon_hash_2_bn254;
     use starknet::event::EventEmitter;
     use starknet::storage::{
-        Map, MutableVecTrait, StoragePathEntry, StoragePointerReadAccess, StoragePointerWriteAccess,
-        VecTrait,
+        Map, StoragePathEntry, StoragePointerReadAccess, StoragePointerWriteAccess,
     };
     use starknet::{
         ContractAddress, SyscallResultTrait, get_block_timestamp, get_caller_address,
@@ -84,7 +80,7 @@ mod IZkBadgeImpl {
     };
     use crate::erc20::{IERC20Dispatcher, IERC20DispatcherTrait};
     use crate::{Feature, VoteTally};
-    use super::{IERC20, IZkBadge};
+    use super::IZkBadge;
 
     pub const VERIFIER_CLASSHASH: felt252 =
         0x01a9aa9d61d25fe04260e5e6b9ec7bdbed753a31c99f8cd47e39d6a528bb820b;
@@ -102,10 +98,10 @@ mod IZkBadgeImpl {
     #[storage]
     struct Storage {
         admin: ContractAddress,
-        feature_balances: Map<u64, u128>,
+        feature_balances: Map<u64, u256>,
         trusted_issuers: Map<ContractAddress, bool>,
         registered_hashes: Map<u256, Status>,
-        protocol_tvl: Map<felt252, u128>,
+        protocol_tvl: Map<ContractAddress, u256>,
         certificate_owners: Map<ContractAddress, u256>,
         features: Map<u64, Feature>,
         feature_counter: u64,
@@ -240,7 +236,7 @@ mod IZkBadgeImpl {
             category: ByteArray,
             image_url: ByteArray,
             min_age: u256,
-            price: u64,
+            price: u256,
             coin_type: ContractAddress,
         ) {
             let feature_id = self.feature_counter.read();
@@ -300,25 +296,23 @@ mod IZkBadgeImpl {
                 let success = erc20
                     .transfer_from(get_caller_address(), get_contract_address(), feature.price);
                 assert(success, 'Payment failed');
-                // let current_balance = self.feature_balances.entry(feature_id).read();
-            // self
-            //     .feature_balances
-            //     .entry(feature_id)
-            //     .write(current_balance + feature.price.into());
-
-                // let current_tvl = self.protocol_tvl.entry(feature.coin_type).read();
-            // self
-            //     .protocol_tvl
-            //     .entry(feature.coin_type)
-            //     .write(current_tvl + feature.price.into());
+                let current_balance = self.feature_balances.entry(feature_id).read();
+                self
+                    .feature_balances
+                    .entry(feature_id)
+                    .write(current_balance + feature.price.into());
+                let current_tvl = self.protocol_tvl.entry(feature.coin_type).read();
+                self
+                    .protocol_tvl
+                    .entry(feature.coin_type)
+                    .write(current_tvl + feature.price.into());
             }
-            // self.access_nullifiers.write(access_nullifier, true);
-        // self
-        //     .emit(
-        //         Event::FeatureAccessed(
-        //             FeatureAccessedEvent { feature_id, caller: get_caller_address() },
-        //         ),
-        //     );
+            self
+                .emit(
+                    Event::FeatureAccessed(
+                        FeatureAccessedEvent { feature_id, caller: get_caller_address() },
+                    ),
+                );
         }
 
 
@@ -364,15 +358,11 @@ mod IZkBadgeImpl {
         ) {
             let feature = self.features.entry(feature_id).read();
             assert(feature.creator == get_caller_address(), 'Only creator');
-
-            let balance: u128 = self.feature_balances.entry(feature_id).read();
+            let balance = self.feature_balances.entry(feature_id).read();
             assert(balance > 0, 'No balance');
-
-            let amount: u256 = u256 { low: balance.into(), high: 0 };
             let erc20 = IERC20Dispatcher { contract_address: token_contract };
-            let success = erc20.transfer(feature.creator, amount);
+            let success = erc20.transfer(feature.creator, feature.price);
             assert(success, 'Withdraw failed');
-
             self.feature_balances.entry(feature_id).write(0);
         }
 
