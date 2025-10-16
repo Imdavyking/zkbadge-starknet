@@ -86,8 +86,8 @@ mod IZkBadgeImpl {
 
     // Enums
     #[derive(Copy, Drop, Serde, starknet::Store)]
-    #[allow(starknet::store_no_default_variant)]
     enum Status {
+        #[default]
         Pending: (),
         Verified: (),
         Revoked: (),
