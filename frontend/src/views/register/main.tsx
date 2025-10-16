@@ -117,13 +117,13 @@ export default function RegisterCertForm() {
         valid_until: `0x${input.valid_until.toString(16)}`,
         is_valid: true,
         secret: `0x${input.secret.toString(16)}`,
-        year_of_birth: `0x${input.year_of_birth.toString(16)}`,
+        year_of_birth: 2001,
         hash: `0x${hash.toString(16)}`,
-        min_age_feature: "0x00",
+        min_age_feature: 0,
         access_nullifier: accessNullifierHash,
         now: `0x${input.now.toString(16)}`,
         owner: `0x${input.owner.toString(16)}`,
-        current_year: `0x${input.current_year.toString(16)}`,
+        current_year: 2025,
       };
 
       const { callData } = await generateProof(zk_data);
