@@ -7,7 +7,7 @@ import {
   useSendTransaction,
 } from "@starknet-react/core";
 import { CONTRACT_ADDRESS } from "../../utils/constants";
-import abi from "@/assets/json/abi.json";
+import abi from "../../assets/json/abi.json";
 
 const VerifyBadge = () => {
   const [loading, setLoading] = useState(false);

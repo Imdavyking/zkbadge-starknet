@@ -6,8 +6,6 @@ import {
   braavos,
   infuraProvider,
   lavaProvider,
-  nethermindProvider,
-  reddioProvider,
   StarknetConfig,
   starkscan,
   useInjectedConnectors,
@@ -18,7 +16,6 @@ import { WebWalletConnector } from "starknetkit/webwallet";
 
 const apiKey = import.meta.env.VITE_PUBLIC_API_KEY;
 const nodeProvider = import.meta.env.VITE_PUBLIC_PROVIDER;
-
 
 interface StarknetProviderProps {
   children: React.ReactNode;
@@ -43,12 +40,7 @@ export function StarknetProvider({ children }: StarknetProviderProps) {
     provider = alchemyProvider({ apiKey });
   } else if (nodeProvider == "lava") {
     provider = lavaProvider({ apiKey });
-  } else if (nodeProvider == "nethermind") {
-    provider = nethermindProvider({ apiKey });
-  } else if (nodeProvider == "reddio"){
-    provider = reddioProvider({ apiKey });
   }
-
   return (
     <StarknetConfig
       connectors={connectors as any[]}

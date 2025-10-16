@@ -3,10 +3,6 @@ import React, { useMemo, useState } from "react";
 import { toast } from "react-toastify";
 import { FaSpinner } from "react-icons/fa";
 import type { JsonCertificate } from "../../lib/utils";
-import {
-  parseCoinPublicKeyToHex,
-  fromHex,
-} from "@midnight-ntwrk/midnight-js-utils";
 
 function toMsBigIntFromLocalDateTime(value: string): bigint {
   const ms = Date.parse(value);

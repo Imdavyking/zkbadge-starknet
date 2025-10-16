@@ -1,8 +1,5 @@
-import type { DerivedCertVerificationContractState } from "@zkbadge/zkbadge-api";
 import React, { useEffect } from "react";
-import useDeployment from "../../hookes/useDeployment";
 import { toast } from "react-toastify";
-import { wait } from "../../utils/helpers";
 import { Feature } from "./feature";
 
 //
@@ -52,37 +49,8 @@ function mapStateFeature(raw: any): FeatureJson {
 // ------------------- Component -------------------
 //
 const ViewFeatures: React.FC = () => {
-  const deploymentContext = useDeployment();
-  const deploymentProvider = deploymentContext?.zkBadgeApi;
-
   const [features, setFeatures] = React.useState<FeatureJson[]>([]);
   const [loading, setLoading] = React.useState(true);
-
-  useEffect(() => {
-    if (!deploymentContext?.hasJoined) {
-      toast.info(`Joining contract...try again in a moment`);
-      deploymentContext?.onJoinContract().then(async () => {
-        await wait(1);
-        setLoading(false);
-      });
-    } else {
-      setLoading(false);
-    }
-
-    if (!deploymentProvider) return;
-
-    const stateSubscription = deploymentProvider.state.subscribe(
-      (state: DerivedCertVerificationContractState) => {
-        console.log("getting features");
-        const mapped = state.features.map((f: any) => mapStateFeature(f));
-        setFeatures(mapped);
-      }
-    );
-
-    return () => {
-      stateSubscription.unsubscribe();
-    };
-  }, [deploymentProvider]);
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
