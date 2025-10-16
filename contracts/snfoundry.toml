@@ -1,5 +1,5 @@
 [sncast.default]
-url = "http://localhost:5050/rpc"
+url = "https://starknet-sepolia.g.alchemy.com/starknet/version/rpc/v0_8/gpR0c9Le2dR45Fqit9OXTz6dtpf1HPfa"
 accounts-file = "accounts.json"
 account = "devnet0"
 show-explorer-links = false

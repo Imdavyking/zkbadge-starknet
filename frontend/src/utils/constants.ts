@@ -1,0 +1,5 @@
+/// <reference types="vite/client" />
+
+export const CONTRACT_ADDRESS = import.meta.env.VITE_CONTRACT_ADDRESS;
+export const NATIVE_TOKEN =
+  "0x0000000000000000000000000000000000000000000000000000000000000000";
