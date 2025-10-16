@@ -74,16 +74,15 @@ mod IZkBadgeImpl {
     use starknet::storage::{
         Map, StoragePathEntry, StoragePointerReadAccess, StoragePointerWriteAccess,
     };
+    use starknet::syscalls::deploy_syscall;
     use starknet::{
-        ContractAddress, SyscallResultTrait, get_block_timestamp, get_caller_address,
+        ClassHash, ContractAddress, SyscallResultTrait, get_block_timestamp, get_caller_address,
         get_contract_address, get_tx_info, syscalls,
     };
     use crate::erc20::{IERC20Dispatcher, IERC20DispatcherTrait};
     use crate::{Feature, VoteTally};
     use super::IZkBadge;
 
-    pub const VERIFIER_CLASSHASH: felt252 =
-        0x01a9aa9d61d25fe04260e5e6b9ec7bdbed753a31c99f8cd47e39d6a528bb820b;
 
     // Enums
     #[derive(Copy, Drop, Serde, starknet::Store)]
@@ -109,10 +108,17 @@ mod IZkBadgeImpl {
         feature_vote_tallies: Map<u64, VoteTally>,
         verified_users: Map<ContractAddress, bool>,
         user_feature_access: Map<(ContractAddress, u64), bool>,
+        verifier_classhash: ClassHash,
     }
 
     #[constructor]
-    fn constructor(ref self: ContractState) {
+    fn constructor(ref self: ContractState, class_hash: ClassHash) {
+        let salt = 0;
+        let unique = false;
+        let mut calldata = array![];
+        let (_contract_address, _) = deploy_syscall(class_hash, salt, calldata.span(), unique)
+            .unwrap();
+        self.verifier_classhash.write(class_hash);
         let tx_info = get_tx_info();
         self.feature_counter.write(0);
         self.admin.write(tx_info.account_contract_address);
@@ -160,27 +166,23 @@ mod IZkBadgeImpl {
         vote: bool,
     }
 
-    fn verify_honk_proof(full_proof_with_hints: Span<felt252>) -> (bool, Span<u256>) {
-        let mut result = syscalls::library_call_syscall(
-            VERIFIER_CLASSHASH.try_into().unwrap(),
-            selector!("verify_ultra_starknet_honk_proof"),
-            full_proof_with_hints,
-        )
-            .unwrap_syscall();
-
-        let public_inputs = Serde::<Option<Span<u256>>>::deserialize(ref result)
-            .expect('Deserialization failed')
-            .expect('Proof is invalid');
-        (true, public_inputs)
-    }
-
 
     #[abi(embed_v0)]
     impl IZkBadgeImpl of IZkBadge<ContractState> {
         fn verify_honk_proof(
             ref self: ContractState, full_proof_with_hints: Span<felt252>,
         ) -> (bool, Span<u256>) {
-            verify_honk_proof(full_proof_with_hints)
+            let mut result = syscalls::library_call_syscall(
+                self.verifier_classhash.read(),
+                selector!("verify_ultra_starknet_honk_proof"),
+                full_proof_with_hints,
+            )
+                .unwrap_syscall();
+
+            let public_inputs = Serde::<Option<Span<u256>>>::deserialize(ref result)
+                .expect('Deserialization failed')
+                .expect('Proof is invalid');
+            (true, public_inputs)
         }
 
 
