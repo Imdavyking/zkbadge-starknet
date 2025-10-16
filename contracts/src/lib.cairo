@@ -104,6 +104,7 @@ mod IZkBadgeImpl {
         protocol_tvl: Map<ContractAddress, u256>,
         certificate_owners: Map<ContractAddress, u256>,
         features: Map<u64, Feature>,
+        access_nullifiers: Map<u256, bool>,
         feature_counter: u64,
         feature_vote_tallies: Map<u64, VoteTally>,
         verified_users: Map<ContractAddress, bool>,
@@ -283,7 +284,7 @@ mod IZkBadgeImpl {
 
             let cert_hash = *public_inputs.at(0);
             let min_age_feature = *public_inputs.at(1);
-            let _issuer = *public_inputs.at(2);
+            let_pub_access_nullifier = *public_inputs.at(2);
             let current_time = *public_inputs.at(3);
 
             match self.registered_hashes.entry(cert_hash).read() {
@@ -333,7 +334,7 @@ mod IZkBadgeImpl {
 
             let cert_hash = *public_inputs.at(0);
             let min_age_feature = *public_inputs.at(1);
-            let _issuer = *public_inputs.at(2);
+            let_pub_access_nullifier = *public_inputs.at(2);
             let current_time = *public_inputs.at(3);
 
             assert(min_age_feature >= feature.min_age, 'Age verification failed');

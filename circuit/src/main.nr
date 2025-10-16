@@ -71,11 +71,10 @@ fn check_age_feature(cert: Certificate, feature_age: u16, current_year: u16) -> 
 }
 
 // Generate access nullifier using Poseidon2
-fn gen_access_nullifier(cert: Certificate, feature_id: u64) -> Field {
+fn gen_access_nullifier(cert: Certificate, secret: Field) -> Field {
     let cert_hash_field = cert_hash(cert);
-    let feature_field = feature_id as Field;
 
-    let inputs = [cert_hash_field, feature_field];
+    let inputs = [cert_hash_field, secret];
     poseidon2::Poseidon2::hash(inputs, inputs.len())
 }
 
@@ -108,10 +107,11 @@ fn main(
     valid_until: u64,
     is_valid: bool,
     year_of_birth: u16,
+    secret: Field,
     // Public inputs
     pub_hash: pub Field,
     min_age_feature: pub u16,
-    pub_issuer: pub [u8; 32],
+    pub_access_nullifier: pub Field,
     pub_now: pub u64,
     pub_caller: pub [u8; 32],
     current_year: pub u16,
@@ -137,4 +137,6 @@ fn main(
 
     let age_ok = check_age_feature(cert, min_age_feature, current_year);
     assert(age_ok, "user can not access this");
+
+    assert(pub_access_nullifier == gen_access_nullifier(cert, secret), "nullifier not correct");
 }
