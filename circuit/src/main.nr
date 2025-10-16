@@ -83,13 +83,6 @@ fn cert_poseidon_hash(cert: Certificate) -> Field {
     cert_hash(cert)
 }
 
-// Helper to create Poseidon2 commitment for certificate
-fn cert_commitment(cert: Certificate, secret: Field) -> Field {
-    let cert_hash_field = cert_hash(cert);
-    let inputs = [cert_hash_field, secret];
-    poseidon2::Poseidon2::hash(inputs, inputs.len())
-}
-
 fn main(
     // Private witnesses
     issuer: [u8; 32],
@@ -99,11 +92,11 @@ fn main(
     year_of_birth: u16,
     secret: Field,
     // Public inputs
-    pub_hash: pub Field,
+    hash: pub Field,
     min_age_feature: pub u16,
-    pub_access_nullifier: pub Field,
-    pub_now: pub u64,
-    pub_caller: pub [u8; 32],
+    access_nullifier: pub Field,
+    now: pub u64,
+    caller: pub [u8; 32],
     current_year: pub u16,
 ) {
     let cert = user_certificate(
@@ -111,22 +104,22 @@ fn main(
         issued_at,
         valid_until,
         is_valid,
-        pub_caller,
+        caller,
         year_of_birth,
     );
 
     // Verify certificate freshness and ownership
-    let proof_ok = prove_cert_signed_and_fresh(cert, pub_now, pub_caller);
+    let proof_ok = prove_cert_signed_and_fresh(cert, now, caller);
     assert(proof_ok, "certificate invalid");
 
     // Verify certificate Poseidon2 hash matches public input
     let computed_hash = cert_poseidon_hash(cert);
-    assert(computed_hash == pub_hash, "hash doesn't match certificate");
+    assert(computed_hash == hash, "hash doesn't match certificate");
 
     // // Example: check age for a feature requiring 18+
 
     let age_ok = check_age_feature(cert, min_age_feature, current_year);
     assert(age_ok, "user can not access this");
 
-    assert(pub_access_nullifier == gen_access_nullifier(cert, secret), "nullifier not correct");
+    assert(access_nullifier == gen_access_nullifier(cert, secret), "nullifier not correct");
 }

@@ -284,8 +284,13 @@ mod IZkBadgeImpl {
 
             let cert_hash = *public_inputs.at(0);
             let min_age_feature = *public_inputs.at(1);
-            let_pub_access_nullifier = *public_inputs.at(2);
-            let current_time = *public_inputs.at(3);
+            let access_nullifier = *public_inputs.at(2);
+            let _current_time = *public_inputs.at(3);
+
+            // CRITICAL: Check nullifier hasn't been spent globally
+            assert(
+                !self.access_nullifiers.entry(access_nullifier).read(), 'Nullifier already spent',
+            );
 
             match self.registered_hashes.entry(cert_hash).read() {
                 Status::Verified(()) => {},
@@ -316,6 +321,7 @@ mod IZkBadgeImpl {
                         FeatureAccessedEvent { feature_id, caller: get_caller_address() },
                     ),
                 );
+            self.user_feature_access.entry((caller, feature_id)).write(true);
         }
 
 
@@ -334,8 +340,13 @@ mod IZkBadgeImpl {
 
             let cert_hash = *public_inputs.at(0);
             let min_age_feature = *public_inputs.at(1);
-            let_pub_access_nullifier = *public_inputs.at(2);
-            let current_time = *public_inputs.at(3);
+            let access_nullifier = *public_inputs.at(2);
+            let _current_time = *public_inputs.at(3);
+
+            // CRITICAL: Check nullifier hasn't been spent globally
+            assert(
+                !self.access_nullifiers.entry(access_nullifier).read(), 'Nullifier already spent',
+            );
 
             assert(min_age_feature >= feature.min_age, 'Age verification failed');
 
@@ -358,6 +369,7 @@ mod IZkBadgeImpl {
                         FeatureVotedEvent { feature_id, vote: like, caller: get_caller_address() },
                     ),
                 );
+            self.user_feature_access.entry((caller, feature_id)).write(true);
         }
 
 
