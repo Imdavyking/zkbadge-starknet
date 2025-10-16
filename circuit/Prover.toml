@@ -6,7 +6,7 @@ is_valid = true
 year_of_birth = 1990
 secret = "0x27176fe12e4034d09b28fedd72ba97"
 # Public inputs
-hash = "0x2ade0269e6e70321ba509ece15ba978b18c3c3339f3e031924873161e9a30f3"
+hash = "0x7a942045e2529554b200a1dffe13ae52b791755b1c73245067e792a46e08c12"
 min_age_feature = 18
 access_nullifier = "0x2fc58b7057524576a4cec4a9b6be09de"
 now = 1704067200

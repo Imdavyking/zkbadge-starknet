@@ -100,7 +100,7 @@ fn main(
 
     // Verify certificate Poseidon2 hash matches public input
     let computed_hash = cert_poseidon_hash(cert);
-    assert(computed_hash == hash, "hash doesn't match certificate");
+    assert(computed_hash == hash, computed_hash);
 
     // // Example: check age for a feature requiring 18+
 
