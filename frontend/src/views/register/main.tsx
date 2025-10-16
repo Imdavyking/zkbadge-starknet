@@ -111,7 +111,7 @@ export default function RegisterCertForm() {
         input.secret,
       ]).toString(16)}`;
 
-      const { callData } = await generateProof({
+      const zk_data = {
         issuer: `0x${input.issuer.toString(16)}`,
         issued_at: `0x${input.issued_at.toString(16)}`,
         valid_until: `0x${input.valid_until.toString(16)}`,
@@ -124,7 +124,11 @@ export default function RegisterCertForm() {
         now: `0x${input.now.toString(16)}`,
         owner: `0x${input.owner.toString(16)}`,
         current_year: `0x${input.current_year.toString(16)}`,
-      });
+      };
+
+      console.log(zk_data);
+
+      const { callData } = await generateProof(zk_data);
 
       const {
         isError,
