@@ -72,7 +72,7 @@ scarb test
 ### 1. Clone & Install Dependencies
 
 ```bash
-git clone <your-repo>
+git clone https://github.com/Imdavyking/zkbadge-starknet
 cd zkbadge
 make install-bun install-noir install-barretenberg install-starknet install-devnet install-garaga install-app-deps
 ```
