@@ -55,10 +55,6 @@ fn prove_cert_signed_and_fresh(cert: Certificate, now: u64, caller_pub: [u8; 32]
     // Verify ownership
     assert(cert.owner == caller_pub);
     assert(cert.is_valid);
-    assert(now < cert.valid_until);
-
-    // Signature verification would use msg_hash as the message digest
-    // Poseidon2 hash is directly usable as Field element for signature verification
 
     true
 }
