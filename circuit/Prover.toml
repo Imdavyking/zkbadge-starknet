@@ -1,2 +1,14 @@
-x = "1"
-y = "2"
+# Private witnesses (kept secret)
+issuer = "0x6789abcdef123678fc58b79b6be4567"
+issued_at = 1697059200
+valid_until = 1735689600
+is_valid = true
+year_of_birth = 1990
+secret = "0x27176fe12e4034d09b28fedd72ba97"
+# Public inputs
+hash = "0x7a942045e2529554b200a1dffe13ae52b791755b1c73245067e792a46e08c12"
+min_age_feature = 18
+access_nullifier = "0x23d0cd5d50fd29a9d6692f0cd84e839a8ce4e836a209e9c2cf072b2a8154fb1e"
+now = 1704067200
+owner = "0x057524576a4cec4a2fc58b79b6be09de"
+current_year = 2025

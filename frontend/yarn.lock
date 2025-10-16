@@ -17,6 +17,13 @@
   resolved "https://registry.yarnpkg.com/@adraffy/ens-normalize/-/ens-normalize-1.11.1.tgz#6c2d657d4b2dfb37f8ea811dcb3e60843d4ac24a"
   integrity sha512-nhCBV3quEgesuf7c7KYfperqSS14T8bYuvJ8PcLJp6znkZpFc0AuW4qBtr8eKVyPPe/8RSr7sglCWPU5eaxwKQ==
 
+"@argent/x-sessions@9.0.0":
+  version "9.0.0"
+  resolved "https://registry.yarnpkg.com/@argent/x-sessions/-/x-sessions-9.0.0.tgz#0f4eaea063b67a30c0db325e18a84eb785cd0d97"
+  integrity sha512-1dXHhGgI3JvJpjPOnq0kdIMaDk9XO6eo43vUgAqPkHc79hQKto9euNXAxXN98LImIea828rQm9vETY876KaTIw==
+  dependencies:
+    minimalistic-assert "^1.0.1"
+
 "@argent/x-ui@^1.109.0":
   version "1.109.1"
   resolved "https://registry.yarnpkg.com/@argent/x-ui/-/x-ui-1.109.1.tgz#585671bb630f050c87cf77732f5f22ccec0b8e8f"
@@ -660,13 +667,6 @@
   dependencies:
     "@noble/hashes" "1.4.0"
 
-"@noble/curves@1.7.0", "@noble/curves@~1.7.0":
-  version "1.7.0"
-  resolved "https://registry.yarnpkg.com/@noble/curves/-/curves-1.7.0.tgz#0512360622439256df892f21d25b388f52505e45"
-  integrity sha512-UTMhXK9SeDhFJVrHeUJ5uZlI6ajXg10O6Ddocf9S6GjbSBVZsJo88HzKwXznNfGpMTRDyJkqMjNDPYgf0qFWnw==
-  dependencies:
-    "@noble/hashes" "1.6.0"
-
 "@noble/curves@1.8.0":
   version "1.8.0"
   resolved "https://registry.yarnpkg.com/@noble/curves/-/curves-1.8.0.tgz#fe035a23959e6aeadf695851b51a87465b5ba8f7"
@@ -694,6 +694,13 @@
   integrity sha512-gbKGcRUYIjA3/zCCNaWDciTMFI0dCkvou3TL8Zmy5Nc7sJ47a0jtOeZoTaMxkuqRo9cRhjOdZJXegxYE5FN/xw==
   dependencies:
     "@noble/hashes" "1.8.0"
+
+"@noble/curves@~1.7.0":
+  version "1.7.0"
+  resolved "https://registry.yarnpkg.com/@noble/curves/-/curves-1.7.0.tgz#0512360622439256df892f21d25b388f52505e45"
+  integrity sha512-UTMhXK9SeDhFJVrHeUJ5uZlI6ajXg10O6Ddocf9S6GjbSBVZsJo88HzKwXznNfGpMTRDyJkqMjNDPYgf0qFWnw==
+  dependencies:
+    "@noble/hashes" "1.6.0"
 
 "@noble/hashes@1.3.2":
   version "1.3.2"
@@ -1005,11 +1012,6 @@
   resolved "https://registry.yarnpkg.com/@rollup/rollup-win32-x64-msvc/-/rollup-win32-x64-msvc-4.52.4.tgz#5b2dd648a960b8fa00d76f2cc4eea2f03daa80f4"
   integrity sha512-bf9PtUa0u8IXDVxzRToFQKsNCRz9qLYfR/MpECxl4mRoWYjAeFjgxj1XdZr2M/GNVpT05p+LgQOHopYDlUu6/w==
 
-"@scure/base@1.2.1":
-  version "1.2.1"
-  resolved "https://registry.yarnpkg.com/@scure/base/-/base-1.2.1.tgz#dd0b2a533063ca612c17aa9ad26424a2ff5aa865"
-  integrity sha512-DGmGtC8Tt63J5GfHgfl5CuAXh96VF/LD8K9Hr/Gv0J2lAoRGlPOMpqMpMbCTOoOJMZCk2Xt+DskdDyn6dEFdzQ==
-
 "@scure/base@1.2.6", "@scure/base@^1.2.1", "@scure/base@~1.2.1", "@scure/base@~1.2.5":
   version "1.2.6"
   resolved "https://registry.yarnpkg.com/@scure/base/-/base-1.2.6.tgz#ca917184b8231394dd8847509c67a0be522e59f6"
@@ -1114,6 +1116,15 @@
   resolved "https://registry.yarnpkg.com/@stablelib/wipe/-/wipe-1.0.1.tgz#d21401f1d59ade56a62e139462a97f104ed19a36"
   integrity sha512-WfqfX/eXGiAd3RJe4VU2snh/ZPwtSjLG4ynQ/vYzvghTh7dHFcI1wl+nrkWG6lGhukOxOsUHfv8dUXr58D0ayg==
 
+"@starknet-io/get-starknet-core@4.0.7":
+  version "4.0.7"
+  resolved "https://registry.yarnpkg.com/@starknet-io/get-starknet-core/-/get-starknet-core-4.0.7.tgz#d9122ffe66557d7d925d80303db0f607960bed40"
+  integrity sha512-ocwQTdDvGa+0CvjGygyaTuFkda2R82dofydts8uXr9p0Diy/bmYW1fkuqJfi1nC5M+YcvvuEpl6wFvwXM1og5w==
+  dependencies:
+    "@module-federation/runtime" "^0.1.2"
+    "@starknet-io/types-js" "^0.7.7"
+    async-mutex "^0.5.0"
+
 "@starknet-io/get-starknet-core@4.0.8", "@starknet-io/get-starknet-core@^4.0.8":
   version "4.0.8"
   resolved "https://registry.yarnpkg.com/@starknet-io/get-starknet-core/-/get-starknet-core-4.0.8.tgz#c5492f6bcaf5a488c5e4979aee0c6c456e885209"
@@ -1130,11 +1141,6 @@
   dependencies:
     "@starknet-io/get-starknet-core" "4.0.8"
     bowser "^2.11.0"
-
-"@starknet-io/starknet-types-07@npm:@starknet-io/types-js@~0.7.10":
-  version "0.7.10"
-  resolved "https://registry.yarnpkg.com/@starknet-io/types-js/-/types-js-0.7.10.tgz#d21dc973d0cd04d7b6293ce461f2f06a5873c760"
-  integrity sha512-1VtCqX4AHWJlRRSYGSn+4X1mqolI1Tdq62IwzoU2vUuEE72S1OlEeGhpvd6XsdqXcfHmVzYfj8k1XtKBQqwo9w==
 
 "@starknet-io/starknet-types-08@npm:@starknet-io/types-js@~0.8.4":
   version "0.8.4"
@@ -3272,7 +3278,7 @@ loose-envify@^1.1.0:
   dependencies:
     js-tokens "^3.0.0 || ^4.0.0"
 
-lossless-json@^4.0.1, lossless-json@^4.2.0:
+lossless-json@^4.2.0:
   version "4.3.0"
   resolved "https://registry.yarnpkg.com/lossless-json/-/lossless-json-4.3.0.tgz#7d26864820ecf08aee800213fc193666e794802a"
   integrity sha512-ToxOC+SsduRmdSuoLZLYAr5zy1Qu7l5XhmPWM3zefCZ5IcrzW/h108qbJUKfOlDlhvhjUK84+8PSVX0kxnit0g==
@@ -3351,6 +3357,11 @@ mime@^3.0.0:
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/mime/-/mime-3.0.0.tgz#b374550dca3a0c18443b0c950a6a58f1931cf7a7"
   integrity sha512-jSCU7/VB1loIWBZe14aEYHU/+1UMEHoaO7qxCOVJOw9GgH72VAWppxNcjU+x9a2k3GSIBXNKxXQFqRvvZ7vr3A==
+
+minimalistic-assert@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/minimalistic-assert/-/minimalistic-assert-1.0.1.tgz#2e194de044626d4a10e7f7fbc00ce73e83e4d5c7"
+  integrity sha512-UtJcAD4yEaGtjPezWuO9wC4nwUnVH/8/Im3yEHQP4b67cXlD/Qr9hdITCU1xDbSEXg2XKNaP8jsReV7vQd00/A==
 
 minimatch@^3.1.2:
   version "3.1.2"
@@ -4131,22 +4142,6 @@ split2@^4.0.0:
   resolved "https://registry.yarnpkg.com/split2/-/split2-4.2.0.tgz#c9c5920904d148bab0b9f67145f245a86aadbfa4"
   integrity sha512-UcjcJOWknrNkF6PLX83qcHM6KHgVKNkV62Y8a5uYDVv9ydGQVwAHMKqHdJje1VTWpljG0WYpCDhrCdAOYH4TWg==
 
-starknet@^7.6.4:
-  version "7.6.4"
-  resolved "https://registry.yarnpkg.com/starknet/-/starknet-7.6.4.tgz#8ca2f3decbecde6316e7561b39f6a296a7fa33b5"
-  integrity sha512-FB20IaLCDbh/XomkB+19f5jmNxG+RzNdRO7QUhm7nfH81UPIt2C/MyWAlHCYkbv2wznSEb73wpxbp9tytokTgQ==
-  dependencies:
-    "@noble/curves" "1.7.0"
-    "@noble/hashes" "1.6.0"
-    "@scure/base" "1.2.1"
-    "@scure/starknet" "1.1.0"
-    "@starknet-io/starknet-types-07" "npm:@starknet-io/types-js@~0.7.10"
-    "@starknet-io/starknet-types-08" "npm:@starknet-io/types-js@~0.8.4"
-    abi-wan-kanabi "2.2.4"
-    lossless-json "^4.0.1"
-    pako "^2.0.4"
-    ts-mixer "^6.0.3"
-
 starknet@^8.5.2:
   version "8.5.5"
   resolved "https://registry.yarnpkg.com/starknet/-/starknet-8.5.5.tgz#b189d887c9323751c27a5a233b85ac69b94ea929"
@@ -4163,10 +4158,10 @@ starknet@^8.5.2:
     pako "^2.0.4"
     ts-mixer "^6.0.3"
 
-starknetkit@^3.2.0:
-  version "3.2.0"
-  resolved "https://registry.yarnpkg.com/starknetkit/-/starknetkit-3.2.0.tgz#ed25ef3f40902e7efbf5eff7bfc9168c18fee061"
-  integrity sha512-8SIz4l9XtqWI+iLSm2ZqPP33i3ID4fNEDD7bBh6nzxh1ykW0JIAegkLA6epyZW0oT9fYR2Xt+X5lXRZX9Rt9qg==
+starknetkit@3.3.0:
+  version "3.3.0"
+  resolved "https://registry.yarnpkg.com/starknetkit/-/starknetkit-3.3.0.tgz#f3c7f434ce5c79d992f10c8a7a068d879759448b"
+  integrity sha512-qP+vZofxn2Cd8qn0xzLFqEKBosOp5KQ/CZBEm/rMkAyuX+9qeyg9v/EibUq5Pk5Ggpzr+VeR6ZAGiNV3F/MK4g==
   dependencies:
     "@argent/x-ui" "^1.109.0"
     "@cartridge/controller" "^0.10.0"

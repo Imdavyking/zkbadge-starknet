@@ -1,0 +1,8 @@
+{
+  "name": "zkbadge-starknet",
+  "packageManager": "yarn@4.3.1",
+  "dependencies": {
+    "@zkpassport/poseidon2": "^0.6.1",
+    "poseidon-lite": "^0.3.0"
+  }
+}

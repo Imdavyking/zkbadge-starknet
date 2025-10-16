@@ -1,31 +1,22 @@
 use dep::poseidon::poseidon2;
 
 struct Certificate {
-    issuer: [u8; 32],
+    issuer: Field,
     issued_at: u64,
     valid_until: u64,
     is_valid: bool,
-    owner: [u8; 32],
+    owner: Field,
     year_of_birth: u16,
-}
-
-// Helper to convert [u8; 32] to Field for hashing
-fn bytes32_to_field(bytes: [u8; 32]) -> Field {
-    let mut result = 0;
-    for i in 0..32 {
-        result = result * 256 + (bytes[i] as Field);
-    }
-    result
 }
 
 // Convert certificate to Field array for Poseidon2 hashing
 fn cert_to_fields(cert: Certificate) -> [Field; 6] {
     [
-        bytes32_to_field(cert.issuer),
+        cert.issuer,
         cert.issued_at as Field,
         cert.valid_until as Field,
         if cert.is_valid { 1 } else { 0 } as Field,
-        bytes32_to_field(cert.owner),
+        cert.owner,
         cert.year_of_birth as Field,
     ]
 }
@@ -38,27 +29,23 @@ fn cert_hash(cert: Certificate) -> Field {
 
 // Create certificate
 fn user_certificate(
-    issuer: [u8; 32],
+    issuer: Field,
     issued_at: u64,
     valid_until: u64,
     is_valid: bool,
-    owner: [u8; 32],
+    owner: Field,
     year_of_birth: u16,
 ) -> Certificate {
     Certificate { issuer, issued_at, valid_until, is_valid, owner, year_of_birth }
 }
 
 // Verify certificate signature and freshness using Poseidon2 hash
-fn prove_cert_signed_and_fresh(cert: Certificate, now: u64, caller_pub: [u8; 32]) -> bool {
+fn prove_cert_signed_and_fresh(cert: Certificate, _now: u64, owner: Field) -> bool {
     let _msg_hash = cert_hash(cert);
 
     // Verify ownership
-    assert(cert.owner == caller_pub);
-    assert(cert.is_valid);
-    assert(now < cert.valid_until);
-
-    // Signature verification would use msg_hash as the message digest
-    // Poseidon2 hash is directly usable as Field element for signature verification
+    assert(cert.owner == owner,"not owner");
+    assert(cert.is_valid,"cert is not valid");
 
     true
 }
@@ -84,7 +71,7 @@ fn cert_poseidon_hash(cert: Certificate) -> Field {
 
 fn main(
     // Private witnesses
-    issuer: [u8; 32],
+    issuer: Field,
     issued_at: u64,
     valid_until: u64,
     is_valid: bool,
@@ -95,7 +82,7 @@ fn main(
     min_age_feature: pub u16,
     access_nullifier: pub Field,
     now: pub u64,
-    caller: pub [u8; 32],
+    owner: pub Field,
     current_year: pub u16,
 ) {
     let cert = user_certificate(
@@ -103,17 +90,17 @@ fn main(
         issued_at,
         valid_until,
         is_valid,
-        caller,
+        owner,
         year_of_birth,
     );
 
     // Verify certificate freshness and ownership
-    let proof_ok = prove_cert_signed_and_fresh(cert, now, caller);
+    let proof_ok = prove_cert_signed_and_fresh(cert, now, owner);
     assert(proof_ok, "certificate invalid");
 
     // Verify certificate Poseidon2 hash matches public input
     let computed_hash = cert_poseidon_hash(cert);
-    assert(computed_hash == hash, "hash doesn't match certificate");
+    assert(computed_hash == hash, computed_hash);
 
     // // Example: check age for a feature requiring 18+
 

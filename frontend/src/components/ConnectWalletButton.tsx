@@ -1,9 +1,18 @@
 import { ellipsify } from "../utils/ellipsify";
 import { useConnect, useDisconnect, useAccount } from "@starknet-react/core";
+import {
+  type StarknetkitConnector,
+  useStarknetkitConnectModal,
+} from "starknetkit";
 export default function ConnectWalletButton() {
   const { address } = useAccount();
-  const { connect } = useConnect();
   const { disconnect } = useDisconnect();
+  const { connectAsync, connectors } = useConnect();
+
+  const { starknetkitConnectModal } = useStarknetkitConnectModal({
+    connectors: connectors as StarknetkitConnector[],
+    modalTheme: "dark",
+  });
 
   return (
     <div className="flex flex-col items-center space-y-2">
@@ -13,8 +22,12 @@ export default function ConnectWalletButton() {
             ? () => {
                 disconnect();
               }
-            : () => {
-                connect();
+            : async () => {
+                const { connector } = await starknetkitConnectModal();
+                if (!connector) {
+                  return;
+                }
+                await connectAsync({ connector });
               }
         }
         className={`cursor-pointer px-6 py-2 ${

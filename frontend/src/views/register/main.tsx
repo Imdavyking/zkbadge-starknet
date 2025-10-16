@@ -1,8 +1,16 @@
 import React, { useMemo, useState } from "react";
-
-import { toast } from "react-toastify";
+import { poseidon2Hash } from "@zkpassport/poseidon2";
+import {
+  useAccount,
+  useContract,
+  useSendTransaction,
+} from "@starknet-react/core";
+import { CONTRACT_ADDRESS } from "../../utils/constants";
+import abi from "../../assets/json/abi";
 import { FaSpinner } from "react-icons/fa";
-import type { JsonCertificate } from "../../lib/utils";
+import { toast } from "react-toastify";
+import { useZkVerifier } from "../../helpers/gen_proof";
+import type { ZkProofInput } from "@/lib/common-types";
 
 function toMsBigIntFromLocalDateTime(value: string): bigint {
   const ms = Date.parse(value);
@@ -17,12 +25,30 @@ function currentISOForInput(minutesFromNow = 0) {
   return local.toISOString().slice(0, 16);
 }
 
+const randomNonceBytesHex = (length: number): `0x${string}` => {
+  const newBytes = new Uint8Array(length);
+  crypto.getRandomValues(newBytes);
+
+  let hex: `0x${string}` = "0x";
+  for (const byte of newBytes) {
+    hex += byte.toString(16).padStart(2, "0");
+  }
+  return hex;
+};
+
 export default function RegisterCertForm() {
   const [issuedAt, setIssuedAt] = useState(currentISOForInput(-1));
   const [validUntil, setValidUntil] = useState(currentISOForInput(24 * 30));
   const [isValid, setIsValid] = useState(true);
   const [yob, setYob] = useState(1999);
-  const [issuerHex, setIssuerHex] = useState("");
+  const [issuerHex, setIssuerHex] = useState(randomNonceBytesHex(8));
+  const { address, account } = useAccount();
+  const { generateProof } = useZkVerifier();
+
+  const { contract } = useContract({
+    abi,
+    address: CONTRACT_ADDRESS,
+  });
 
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -55,7 +81,74 @@ export default function RegisterCertForm() {
     setSubmitting(true);
 
     try {
+      const secretHex = randomNonceBytesHex(8);
+      const input = {
+        issuer: BigInt(issuerHex),
+        issued_at: toMsBigIntFromLocalDateTime(issuedAt),
+        valid_until: toMsBigIntFromLocalDateTime(validUntil),
+        is_valid: BigInt(isValid),
+        year_of_birth: BigInt(yob),
+        secret: BigInt(secretHex),
+        min_age_feature: 0n,
+        now: BigInt(new Date().getMilliseconds()),
+        owner: BigInt(address ?? 0),
+        current_year: new Date().getFullYear(),
+      };
+
+      const fields = [
+        input.issuer,
+        input.issued_at,
+        input.valid_until,
+        input.is_valid,
+        input.owner,
+        input.year_of_birth,
+      ];
+
+      // Chain poseidon2 hashes just like in Cairo
+      let hash = poseidon2Hash(fields);
+      let accessNullifierHash: `0x${string}` = `0x${poseidon2Hash([
+        hash,
+        input.secret,
+      ]).toString(16)}`;
+
+      const zk_data: ZkProofInput = {
+        issuer: `0x${input.issuer.toString(16)}`,
+        issued_at: `0x${input.issued_at.toString(16)}`,
+        valid_until: `0x${input.valid_until.toString(16)}`,
+        is_valid: !!input.is_valid,
+        secret: `0x${input.secret.toString(16)}`,
+        year_of_birth: yob,
+        hash: `0x${hash.toString(16)}`,
+        min_age_feature: 0,
+        access_nullifier: accessNullifierHash,
+        now: `0x${input.now.toString(16)}`,
+        owner: `0x${input.owner.toString(16)}`,
+        current_year: input.current_year,
+      };
+
+      const { callData } = await generateProof(zk_data);
+
+      const { sendAsync: registerUser } = useSendTransaction({
+        calls:
+          contract && address
+            ? [contract.populate("register", [callData.slice(1)])]
+            : undefined,
+      });
+      const transaction = await registerUser();
+
+      if (transaction?.transaction_hash) {
+        console.log("Transaction submitted:", transaction.transaction_hash);
+      }
+      await account?.waitForTransaction(transaction.transaction_hash);
+      toast.success("Registered successfully");
+
+      console.log("Certificate data:", zk_data);
+
+      setDownloadData(zk_data);
+
+      handleDownload();
     } catch (err: any) {
+      toast.error(err?.message);
       setError(err?.message ?? String(err));
     } finally {
       setSubmitting(false);
@@ -81,7 +174,7 @@ export default function RegisterCertForm() {
             className="w-full rounded-xl border border-gray-300 px-3 py-2 focus:border-black focus:outline-none"
             placeholder="0x..."
             value={issuerHex}
-            onChange={(e) => setIssuerHex(e.target.value)}
+            onChange={(e) => setIssuerHex(e.target.value as `0x${string}`)}
             autoComplete="off"
             spellCheck={false}
           />
@@ -163,7 +256,7 @@ export default function RegisterCertForm() {
             type="button"
             className="rounded-xl border border-gray-300 px-4 py-2 text-sm"
             onClick={() => {
-              setIssuerHex("");
+              setIssuerHex("0x");
               setIssuedAt(currentISOForInput(-1));
               setValidUntil(currentISOForInput(24 * 30));
               setIsValid(true);

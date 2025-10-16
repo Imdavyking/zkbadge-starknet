@@ -1,5 +1,12 @@
 import React, { useState, useMemo } from "react";
 import { toast } from "react-toastify";
+import {
+  useAccount,
+  useContract,
+  useSendTransaction,
+} from "@starknet-react/core";
+import { CONTRACT_ADDRESS, NATIVE_TOKEN } from "../../utils/constants";
+import abi from "../../assets/json/abi";
 import { FaSpinner } from "react-icons/fa";
 
 function currentISOForInput(minutesFromNow = 0) {
@@ -21,10 +28,30 @@ export default function CreateFeatureForm() {
   );
   const [price, setPrice] = useState(100);
   const [createdAt, setCreatedAt] = useState(currentISOForInput(0));
-
+  const { address, account } = useAccount();
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const { contract } = useContract({
+    abi,
+    address: CONTRACT_ADDRESS,
+  });
+  const { sendAsync: createFeature } = useSendTransaction({
+    calls:
+      contract && address
+        ? [
+            contract.populate("create_feature", [
+              featureName,
+              description,
+              category,
+              imageUrl,
+              BigInt(minAge),
+              BigInt(price),
+              NATIVE_TOKEN,
+            ]),
+          ]
+        : undefined,
+  });
 
   const canSubmit = useMemo(() => {
     return (
@@ -43,6 +70,13 @@ export default function CreateFeatureForm() {
     setSubmitting(true);
 
     try {
+      const transaction = await createFeature();
+
+      if (transaction?.transaction_hash) {
+        console.log("Transaction submitted:", transaction.transaction_hash);
+      }
+      await account?.waitForTransaction(transaction.transaction_hash);
+      toast.success("Feature created successfully");
     } catch (err: any) {
       setError(err?.message ?? String(err));
     } finally {
