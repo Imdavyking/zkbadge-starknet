@@ -16,17 +16,14 @@ async function main() {
   console.log("Account connected.\n");
 
   // Declare & deploy contract
-  let sierraCode,
-    casmCode,
-    zkbadgeManager,
-    casmCodZkbagdeManager;
+  let sierraCode, casmCode, zkbadgeManager, casmCodZkbagdeManager;
 
   try {
-    ({ sierraCode, casmCode } = await getCompiledCode("verifier_UltraStarknetHonkVerifier"));
-    ({
-      sierraCode: zkbadgeManager,
-      casmCode: casmCodZkbagdeManager,
-    } = await getCompiledCode("zkbadge_IZkBadgeImpl"));
+    ({ sierraCode, casmCode } = await getCompiledCode(
+      "verifier_UltraStarknetHonkVerifier"
+    ));
+    ({ sierraCode: zkbadgeManager, casmCode: casmCodZkbagdeManager } =
+      await getCompiledCode("zkbadge_IZkBadgeImpl"));
   } catch (error: any) {
     console.log("Failed to read contract files");
     console.log(error);
@@ -39,6 +36,8 @@ async function main() {
   });
 
   const myCallDataZkBadge = new CallData(zkbadgeManager.abi);
+
+  console.log(`verifier class hash:${declareResponse.class_hash}`);
 
   const constructorZkBadge = myCallDataZkBadge.compile("constructor", {
     class_hash: declareResponse.class_hash,

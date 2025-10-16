@@ -200,23 +200,23 @@ mod IZkBadgeImpl {
 
         fn register(ref self: ContractState, full_proof_with_hints: Span<felt252>) {
             let (is_valid, public_inputs) = self.verify_honk_proof(full_proof_with_hints);
-            assert(is_valid, 'Invalid proof');
-            let caller = get_caller_address();
-            let cert_hash = *public_inputs.at(0);
+            // assert(is_valid, 'Invalid proof');
+            // let caller = get_caller_address();
+            // let cert_hash = *public_inputs.at(0);
 
-            let current_status = self.registered_hashes.entry(cert_hash).read();
-            match current_status {
-                Status::Pending(()) => {},
-                Status::Verified(()) => { assert(false, 'Already verified'); },
-                Status::Revoked(()) => { assert(false, 'Certificate revoked'); },
-                _ => {},
-            }
+            // let current_status = self.registered_hashes.entry(cert_hash).read();
+            // match current_status {
+            //     Status::Pending(()) => {},
+            //     Status::Verified(()) => { assert(false, 'Already verified'); },
+            //     Status::Revoked(()) => { assert(false, 'Certificate revoked'); },
+            //     _ => {},
+            // }
 
-            self.registered_hashes.entry(cert_hash).write(Status::Verified(()));
-            self.certificate_owners.entry(caller).write(cert_hash);
-            self.verified_users.entry(caller).write(true);
+            // self.registered_hashes.entry(cert_hash).write(Status::Verified(()));
+            // self.certificate_owners.entry(caller).write(cert_hash);
+            // self.verified_users.entry(caller).write(true);
 
-            self.emit(Event::CertificateVerified(CertificateVerifiedEvent { caller, cert_hash }));
+            // self.emit(Event::CertificateVerified(CertificateVerifiedEvent { caller, cert_hash }));
         }
 
 
