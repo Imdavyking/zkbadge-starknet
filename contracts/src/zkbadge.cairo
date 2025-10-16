@@ -27,7 +27,6 @@ mod AgeGatedFeaturesContract {
 
     // Enums
     #[derive(Copy, Drop, Serde, starknet::Store)]
-    #[allow(starknet::store_no_default_variant)]
     enum Status {
         Pending: (),
         Verified: (),
