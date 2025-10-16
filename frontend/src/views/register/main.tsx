@@ -126,22 +126,24 @@ export default function RegisterCertForm() {
         current_year: `0x${input.current_year.toString(16)}`,
       });
 
-      // const {
-      //   isError,
-      //   error,
-      //   data,
-      //   sendAsync: registerUser,
-      //   isPending: isRegistering,
-      // } = useSendTransaction({
-      //   calls:
-      //     contract && address ? [contract.populate("register", [])] : undefined,
-      // });
-      // const transaction = await registerUser();
+      const {
+        isError,
+        error,
+        data,
+        sendAsync: registerUser,
+        isPending: isRegistering,
+      } = useSendTransaction({
+        calls:
+          contract && address
+            ? [contract.populate("register", [callData.slice(1)])]
+            : undefined,
+      });
+      const transaction = await registerUser();
 
-      // if (transaction?.transaction_hash) {
-      //   console.log("Transaction submitted:", transaction.transaction_hash);
-      // }
-      // await account?.waitForTransaction(transaction.transaction_hash);
+      if (transaction?.transaction_hash) {
+        console.log("Transaction submitted:", transaction.transaction_hash);
+      }
+      await account?.waitForTransaction(transaction.transaction_hash);
       toast.success("Registered successfully");
     } catch (err: any) {
       toast.error(err?.message);
