@@ -3,19 +3,19 @@ import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import { NodeGlobalsPolyfillPlugin } from "@esbuild-plugins/node-globals-polyfill";
 import { NodeModulesPolyfillPlugin } from "@esbuild-plugins/node-modules-polyfill";
-import rollupNodePolyFill from "rollup-plugin-polyfill-node";
-import { nodePolyfills } from "vite-plugin-node-polyfills";
-import wasm from "vite-plugin-wasm";
+// import rollupNodePolyFill from "rollup-plugin-polyfill-node";
+// import { nodePolyfills } from "vite-plugin-node-polyfills";
+// import wasm from "vite-plugin-wasm";
 // https://vite.dev/config/
 
 export default defineConfig({
   plugins: [
     tailwindcss(),
     react(),
-    wasm(),
-    nodePolyfills({
-      include: ["process", "util", "path"],
-    }),
+    // wasm(),
+    // nodePolyfills({
+    //   include: ["process", "util", "path"],
+    // }),
   ],
   define: {
     "process.env": {},
@@ -33,18 +33,18 @@ export default defineConfig({
         global: "globalThis",
       },
       plugins: [
-        NodeGlobalsPolyfillPlugin({
-          // buffer: true,
-          process: false,
-        }),
-        NodeModulesPolyfillPlugin(),
+        // NodeGlobalsPolyfillPlugin({
+        //   // buffer: true,
+        //   process: false,
+        // }),
+        // NodeModulesPolyfillPlugin(),
       ],
     },
   },
   build: {
     target: "esnext",
     rollupOptions: {
-      plugins: [rollupNodePolyFill()],
+      // plugins: [rollupNodePolyFill()],
     },
   },
 });
