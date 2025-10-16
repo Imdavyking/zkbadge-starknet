@@ -4,7 +4,7 @@ import { NATIVE_TOKEN } from "../../utils/constants";
 import { useEffect, useState } from "react";
 import { FaSpinner } from "react-icons/fa";
 import { toast } from "react-toastify";
-import type { JsonCertificate } from "../../lib/utils";
+import type { ZkProofInput } from "@/lib/common-types";
 
 export const Feature = (feature: FeatureJson) => {
   const [isLiking, setIsLiking] = useState(false);
@@ -12,7 +12,7 @@ export const Feature = (feature: FeatureJson) => {
   const [isAccessing, setIsAccessing] = useState(false);
   const [status, setStatus] = useState("");
   const [error, setError] = useState("");
-  const [certJson, setCertJson] = useState<JsonCertificate | null>(null);
+  const [certJson, setCertJson] = useState<ZkProofInput | null>(null);
   const [loading, setLoading] = useState(true);
   const [voteData, setVoteData] = useState<{ up: bigint; down: bigint } | null>(
     null
@@ -37,20 +37,7 @@ export const Feature = (feature: FeatureJson) => {
     }
   };
 
-  const getCertificationFromJson = (certJson: JsonCertificate): any => {
-    return {
-      issuer: {
-        bytes: " hexToUint8Array(certJson.issuer)",
-      },
-      issued_at: BigInt(certJson.issued_at),
-      valid_until: BigInt(certJson.valid_until),
-      is_valid: certJson.is_valid,
-      owner: {
-        bytes: " hexToUint8Array(certJson.owner)",
-      },
-      year_of_birth: BigInt(certJson.year_of_birth),
-    };
-  };
+ 
 
   const handleLike = async () => {
     try {

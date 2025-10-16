@@ -32,6 +32,26 @@ export default function CreateFeatureForm() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const { contract } = useContract({
+    abi,
+    address: CONTRACT_ADDRESS,
+  });
+  const { sendAsync: createFeature } = useSendTransaction({
+    calls:
+      contract && address
+        ? [
+            contract.populate("create_feature", [
+              featureName,
+              description,
+              category,
+              imageUrl,
+              BigInt(minAge),
+              BigInt(price),
+              NATIVE_TOKEN,
+            ]),
+          ]
+        : undefined,
+  });
 
   const canSubmit = useMemo(() => {
     return (
@@ -50,27 +70,6 @@ export default function CreateFeatureForm() {
     setSubmitting(true);
 
     try {
-      const { contract } = useContract({
-        abi,
-        address: CONTRACT_ADDRESS,
-      });
-
-      const { sendAsync: createFeature } = useSendTransaction({
-        calls:
-          contract && address
-            ? [
-                contract.populate("create_feature", [
-                  featureName,
-                  description,
-                  category,
-                  imageUrl,
-                  BigInt(minAge),
-                  BigInt(price),
-                  NATIVE_TOKEN,
-                ]),
-              ]
-            : undefined,
-      });
       const transaction = await createFeature();
 
       if (transaction?.transaction_hash) {
