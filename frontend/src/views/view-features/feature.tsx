@@ -88,7 +88,7 @@ export const Feature = (feature: FeatureJson) => {
           💰{" "}
           {feature.price > 0
             ? `${feature.price} ${
-                NATIVE_TOKEN == feature.coin_type ? "tDUST" : "Unknown Token"
+                NATIVE_TOKEN == feature.coin_type ? "STRK" : "Unknown Token"
               }`
             : "Free"}
         </span>
