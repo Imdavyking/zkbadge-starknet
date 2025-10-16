@@ -140,7 +140,7 @@ export default function RegisterCertForm() {
       };
 
       const { callData: proofCallData } = await generateProof(zk_data);
-
+      console.log(proofCallData.slice(1));
       setCallData(proofCallData);
 
       const transaction = await registerUser();

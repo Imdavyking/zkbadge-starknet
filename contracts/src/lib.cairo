@@ -65,6 +65,7 @@ pub trait IZkBadge<TContractState> {
     fn get_feature_votes(self: @TContractState, feature_id: u64) -> VoteTally;
     fn get_feature_info(self: @TContractState, feature_id: u64) -> Feature;
     fn get_owner_certificate(self: @TContractState, owner: ContractAddress) -> u256;
+    fn get_verifier_classhash(self: @TContractState) -> felt252;
 }
 
 #[starknet::contract]
@@ -82,6 +83,9 @@ mod IZkBadgeImpl {
     use crate::erc20::{IERC20Dispatcher, IERC20DispatcherTrait};
     use crate::{Feature, VoteTally};
     use super::IZkBadge;
+
+    pub const VERIFIER_CLASSHASH: felt252 =
+        0x65aeb7cb15048722bcebae2708f65a2d6468d3c92b1e5f21614ac8465dfd0cd;
 
 
     // Enums
@@ -108,7 +112,6 @@ mod IZkBadgeImpl {
         feature_vote_tallies: Map<u64, VoteTally>,
         verified_users: Map<ContractAddress, bool>,
         user_feature_access: Map<(ContractAddress, u64), bool>,
-        verifier_classhash: ClassHash,
     }
 
     #[constructor]
@@ -118,7 +121,6 @@ mod IZkBadgeImpl {
         let mut calldata = array![];
         let (_contract_address, _) = deploy_syscall(class_hash, salt, calldata.span(), unique)
             .unwrap();
-        self.verifier_classhash.write(class_hash);
         let tx_info = get_tx_info();
         self.feature_counter.write(0);
         self.admin.write(tx_info.account_contract_address);
@@ -166,18 +168,19 @@ mod IZkBadgeImpl {
         vote: bool,
     }
 
+    
+
 
     #[abi(embed_v0)]
     impl IZkBadgeImpl of IZkBadge<ContractState> {
         fn verify_honk_proof(
             ref self: ContractState, full_proof_with_hints: Span<felt252>,
         ) -> (bool, Span<u256>) {
-            let mut result = syscalls::library_call_syscall(
-                self.verifier_classhash.read(),
+           let mut result = syscalls::library_call_syscall(
+                VERIFIER_CLASSHASH.try_into().unwrap(),
                 selector!("verify_ultra_starknet_honk_proof"),
                 full_proof_with_hints,
-            )
-                .unwrap_syscall();
+            )   .unwrap_syscall();
 
             let public_inputs = Serde::<Option<Span<u256>>>::deserialize(ref result)
                 .expect('Deserialization failed')
@@ -409,6 +412,10 @@ mod IZkBadgeImpl {
 
         fn get_owner_certificate(self: @ContractState, owner: ContractAddress) -> u256 {
             self.certificate_owners.entry(owner).read()
+        }
+
+        fn get_verifier_classhash(self: @ContractState) -> felt252 {
+            VERIFIER_CLASSHASH.try_into().unwrap()
         }
     }
 }
