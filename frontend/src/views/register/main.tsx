@@ -115,7 +115,7 @@ export default function RegisterCertForm() {
         issuer: `0x${input.issuer.toString(16)}`,
         issued_at: `0x${input.issued_at.toString(16)}`,
         valid_until: `0x${input.valid_until.toString(16)}`,
-        is_valid: input.is_valid,
+        is_valid: !!input.is_valid,
         secret: `0x${input.secret.toString(16)}`,
         year_of_birth: yob,
         hash: `0x${hash.toString(16)}`,
@@ -123,7 +123,7 @@ export default function RegisterCertForm() {
         access_nullifier: accessNullifierHash,
         now: `0x${input.now.toString(16)}`,
         owner: `0x${input.owner.toString(16)}`,
-        current_year: 2025,
+        current_year: input.current_year,
       };
 
       console.log(zk_data);
