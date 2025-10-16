@@ -46,7 +46,7 @@ export function useZkVerifier() {
 
     console.log("🔒 Generating proof...");
     const honk = new UltraHonkBackend(circuit.bytecode, { threads: 1 });
-    console.log(execResult.witness);
+
     const proof = await honk.generateProof(execResult.witness, {
       starknet: true,
     });
