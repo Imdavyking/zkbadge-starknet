@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from "react";
+import { poseidon2Hash } from "@zkpassport/poseidon2";
 import {
   useAccount,
   useContract,
@@ -8,6 +9,8 @@ import { CONTRACT_ADDRESS } from "../../utils/constants";
 import abi from "../../assets/json/abi";
 import { FaSpinner } from "react-icons/fa";
 import { toast } from "react-toastify";
+import { useZkVerifier } from "../../helpers/gen_proof";
+import { ProofState, type ProofStateData } from "../../types";
 
 function toMsBigIntFromLocalDateTime(value: string): bigint {
   const ms = Date.parse(value);
@@ -22,12 +25,29 @@ function currentISOForInput(minutesFromNow = 0) {
   return local.toISOString().slice(0, 16);
 }
 
+const randomNonceBytesHex = (length: number): `0x${string}` => {
+  const newBytes = new Uint8Array(length);
+  crypto.getRandomValues(newBytes);
+
+  let hex: `0x${string}` = "0x";
+  for (const byte of newBytes) {
+    hex += byte.toString(16).padStart(2, "0");
+  }
+  return hex;
+};
+
 export default function RegisterCertForm() {
   const [issuedAt, setIssuedAt] = useState(currentISOForInput(-1));
   const [validUntil, setValidUntil] = useState(currentISOForInput(24 * 30));
   const [isValid, setIsValid] = useState(true);
   const [yob, setYob] = useState(1999);
-  const [issuerHex, setIssuerHex] = useState("");
+  const [issuerHex, setIssuerHex] = useState(randomNonceBytesHex(32));
+  const { address, account } = useAccount();
+
+  const { contract } = useContract({
+    abi,
+    address: CONTRACT_ADDRESS,
+  });
 
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -58,32 +78,57 @@ export default function RegisterCertForm() {
     setSuccess(null);
     setDownloadData(null);
     setSubmitting(true);
-    const { address, account } = useAccount();
-
-    const { contract } = useContract({
-      abi,
-      address: CONTRACT_ADDRESS,
-    });
-
-    const {
-      isError,
-      error,
-      data,
-      sendAsync: registerUser,
-      isPending: isRegistering,
-    } = useSendTransaction({
-      calls:
-        contract && address ? [contract.populate("register", [])] : undefined,
-    });
 
     try {
-      const transaction = await registerUser();
+      const input = {
+        issuer: BigInt(issuerHex),
+        issued_at: toMsBigIntFromLocalDateTime(issuedAt),
+        valid_until: toMsBigIntFromLocalDateTime(validUntil),
+        is_valid: 1n,
+        year_of_birth: BigInt(yob),
+        secret: BigInt(randomNonceBytesHex(32)),
+        min_age_feature: 0n,
+        now: BigInt(new Date().getMilliseconds()),
+        owner: BigInt(address ?? 0),
+        current_year: 2025n,
+      };
 
-      if (transaction?.transaction_hash) {
-        console.log("Transaction submitted:", transaction.transaction_hash);
-      }
-      await account?.waitForTransaction(transaction.transaction_hash);
-      toast.success("Points added successfully");
+      const fields = [
+        input.issuer,
+        input.issued_at,
+        input.valid_until,
+        input.is_valid,
+        input.owner,
+        input.year_of_birth,
+      ];
+
+      // Chain poseidon2 hashes just like in Cairo
+      let hash = poseidon2Hash(fields);
+      const zk_data = {
+        cert_hash: "0x" + hash.toString(16),
+        access_nullifier_hash:
+          "0x" + poseidon2Hash([hash, input.secret]).toString(16),
+      };
+
+      console.log(zk_data);
+
+      // const {
+      //   isError,
+      //   error,
+      //   data,
+      //   sendAsync: registerUser,
+      //   isPending: isRegistering,
+      // } = useSendTransaction({
+      //   calls:
+      //     contract && address ? [contract.populate("register", [])] : undefined,
+      // });
+      // const transaction = await registerUser();
+
+      // if (transaction?.transaction_hash) {
+      //   console.log("Transaction submitted:", transaction.transaction_hash);
+      // }
+      // await account?.waitForTransaction(transaction.transaction_hash);
+      toast.success("Registered successfully");
     } catch (err: any) {
       toast.error(err?.message);
       setError(err?.message ?? String(err));
@@ -111,7 +156,7 @@ export default function RegisterCertForm() {
             className="w-full rounded-xl border border-gray-300 px-3 py-2 focus:border-black focus:outline-none"
             placeholder="0x..."
             value={issuerHex}
-            onChange={(e) => setIssuerHex(e.target.value)}
+            onChange={(e) => setIssuerHex(e.target.value as `0x${string}`)}
             autoComplete="off"
             spellCheck={false}
           />
@@ -193,7 +238,7 @@ export default function RegisterCertForm() {
             type="button"
             className="rounded-xl border border-gray-300 px-4 py-2 text-sm"
             onClick={() => {
-              setIssuerHex("");
+              setIssuerHex("0x");
               setIssuedAt(currentISOForInput(-1));
               setValidUntil(currentISOForInput(24 * 30));
               setIsValid(true);
