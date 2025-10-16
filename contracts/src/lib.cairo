@@ -199,7 +199,7 @@ mod IZkBadgeImpl {
 
 
         fn register(ref self: ContractState, full_proof_with_hints: Span<felt252>) {
-            let (is_valid, public_inputs) = verify_honk_proof(full_proof_with_hints);
+            let (is_valid, public_inputs) = self.verify_honk_proof(full_proof_with_hints);
             assert(is_valid, 'Invalid proof');
             let caller = get_caller_address();
             let cert_hash = *public_inputs.at(0);
@@ -278,7 +278,7 @@ mod IZkBadgeImpl {
             let caller = get_caller_address();
             let user_access = self.user_feature_access.entry((caller, feature_id));
             assert(!user_access.read(), 'Invalid proof');
-            let (is_valid, public_inputs) = verify_honk_proof(full_proof_with_hints);
+            let (is_valid, public_inputs) = self.verify_honk_proof(full_proof_with_hints);
             assert(is_valid, 'Invalid proof');
 
             let feature = self.features.entry(feature_id).read();
@@ -335,7 +335,7 @@ mod IZkBadgeImpl {
         ) {
             let caller = get_caller_address();
             let user_access = self.user_feature_access.entry((caller, feature_id));
-            let (is_valid, public_inputs) = verify_honk_proof(full_proof_with_hints);
+            let (is_valid, public_inputs) = self.verify_honk_proof(full_proof_with_hints);
             assert(is_valid, 'Invalid proof');
             assert(user_access.read(), 'user dont have access yet');
             let feature = self.features.entry(feature_id).read();
