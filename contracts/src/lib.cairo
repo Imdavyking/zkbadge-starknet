@@ -1,4 +1,5 @@
 use starknet::ContractAddress;
+pub mod erc20;
 
 #[derive(Drop, Serde, starknet::Store)]
 struct Feature {
@@ -11,7 +12,7 @@ struct Feature {
     price: u64,
     created_at: u64,
     is_active: bool,
-    coin_type: felt252,
+    coin_type: ContractAddress,
 }
 
 #[derive(Copy, Drop, Serde, starknet::Store)]
@@ -36,8 +37,8 @@ pub trait IZkBadge<TContractState> {
     fn add_trusted_issuer(ref self: TContractState, issuer: ContractAddress);
     fn remove_trusted_issuer(ref self: TContractState, issuer: ContractAddress);
     fn register(ref self: TContractState, full_proof_with_hints: Span<felt252>);
-    fn verify_certificates(ref self: TContractState, hashes: Array<felt252>);
-    fn revoke_certificate(ref self: TContractState, cert_hash: felt252);
+    fn verify_certificate(ref self: TContractState, hash: u256);
+    fn revoke_certificate(ref self: TContractState, cert_hash: u256);
     fn create_feature(
         ref self: TContractState,
         name: ByteArray,
@@ -60,10 +61,10 @@ pub trait IZkBadge<TContractState> {
     fn withdraw_funds(ref self: TContractState, feature_id: u64, token_contract: ContractAddress);
 
     // View functions
-    fn is_certificate_verified(self: @TContractState, cert_hash: felt252) -> bool;
+    fn is_certificate_verified(self: @TContractState, cert_hash: u256) -> bool;
     fn get_feature_votes(self: @TContractState, feature_id: u64) -> VoteTally;
     fn get_feature_info(self: @TContractState, feature_id: u64) -> Feature;
-    fn get_owner_certificate(self: @TContractState, owner: ContractAddress) -> felt252;
+    fn get_owner_certificate(self: @TContractState, owner: ContractAddress) -> u256;
 }
 
 #[starknet::contract]
@@ -81,6 +82,7 @@ mod IZkBadgeImpl {
         ContractAddress, SyscallResultTrait, get_block_timestamp, get_caller_address,
         get_contract_address, get_tx_info, syscalls,
     };
+    use crate::erc20::{IERC20Dispatcher, IERC20DispatcherTrait};
     use crate::{Feature, VoteTally};
     use super::{IERC20, IZkBadge};
 
@@ -107,8 +109,8 @@ mod IZkBadgeImpl {
         certificate_owners: Map<ContractAddress, u256>,
         features: Map<u64, Feature>,
         feature_counter: u64,
-        access_nullifiers: Map<felt252, bool>,
-        vote_nullifiers: Map<felt252, bool>,
+        access_nullifiers: Map<u256, bool>,
+        vote_nullifiers: Map<u256, bool>,
         feature_vote_tallies: Map<u64, VoteTally>,
         verified_users: Map<ContractAddress, bool>,
     }
@@ -202,7 +204,7 @@ mod IZkBadgeImpl {
             let (is_valid, public_inputs) = verify_honk_proof(full_proof_with_hints);
             assert(is_valid, 'Invalid proof');
             let caller = get_caller_address();
-            let cert_hash = *public_inputs.at(4);
+            let cert_hash = *public_inputs.at(0);
 
             let current_status = self.registered_hashes.entry(cert_hash).read();
             match current_status {
@@ -220,13 +222,13 @@ mod IZkBadgeImpl {
         }
 
 
-        fn verify_certificates(ref self: ContractState, hash: u256) {
+        fn verify_certificate(ref self: ContractState, hash: u256) {
             assert(get_caller_address() == self.admin.read(), 'Only admin');
-            // self.registered_hashes.entry(hash).write(Status::Verified(()));
+            self.registered_hashes.entry(hash).write(Status::Verified(()));
         }
 
 
-        fn revoke_certificate(ref self: ContractState, cert_hash: felt252) {
+        fn revoke_certificate(ref self: ContractState, cert_hash: u256) {
             assert(get_caller_address() == self.admin.read(), 'Only admin');
             self.registered_hashes.entry(cert_hash).write(Status::Revoked(()));
         }
@@ -253,7 +255,7 @@ mod IZkBadgeImpl {
                 price,
                 created_at: get_block_timestamp(),
                 is_active: true,
-                coin_type: coin_type.into(),
+                coin_type: coin_type,
             };
             self.features.entry(feature_id).write(feature);
             self.feature_vote_tallies.entry(feature_id).write(VoteTally { up: 0, down: 0 });
@@ -263,7 +265,7 @@ mod IZkBadgeImpl {
             self
                 .emit(
                     Event::FeatureCreated(
-                        FeatureCreatedEvent { feature_id, caller: get_caller_address() },
+                        FeatureCreatedEvent { feature_id, creator: get_caller_address() },
                     ),
                 );
         }
@@ -278,40 +280,44 @@ mod IZkBadgeImpl {
             let (is_valid, public_inputs) = verify_honk_proof(full_proof_with_hints);
             assert(is_valid, 'Invalid proof');
 
-            let cert_hash = extract_public_inputs(public_inputs, 3, 0);
-            let access_nullifier = extract_public_inputs(public_inputs, 3, 1);
-            let age_ok_flag = extract_public_inputs(public_inputs, 3, 2);
+            let cert_hash = *public_inputs.at(0);
+            let access_nullifier = *public_inputs.at(1);
+            let age_ok_flag = *public_inputs.at(2);
 
-            assert(
-                self.registered_hashes.read(cert_hash) == Status::Verified(()), 'Cert not verified',
-            );
-            assert(age_ok_flag == 1, 'Age verification failed');
-            assert(!self.access_nullifiers.read(access_nullifier), 'Already accessed');
-
-            let feature = self.features.read(feature_id);
-            assert(feature.is_active, 'Feature inactive');
-
-            if feature.price > 0 {
-                let payment_amount = u256 { low: feature.price.into(), high: 0 };
-                let erc20 = IERC20Dispatcher { contract_address: token_contract };
-                let success = erc20
-                    .transfer_from(get_caller_address(), get_contract_address(), payment_amount);
-                assert(success, 'Payment failed');
-
-                let current_balance = self.feature_balances.read(feature_id);
-                self.feature_balances.write(feature_id, current_balance + feature.price.into());
-
-                let current_tvl = self.protocol_tvl.read(feature.coin_type);
-                self.protocol_tvl.write(feature.coin_type, current_tvl + feature.price.into());
+            match self.registered_hashes.entry(cert_hash).read() {
+                Status::Verified(()) => {},
+                _ => { assert(false, 'Cert not verified'); },
             }
+            // assert(age_ok_flag == 1, 'Age verification failed');
+        // assert(!self.access_nullifiers.entry(access_nullifier).read(), 'Already accessed');
 
-            self.access_nullifiers.write(access_nullifier, true);
-            self
-                .emit(
-                    Event::FeatureAccessed(
-                        FeatureAccessedEvent { feature_id, caller: get_caller_address() },
-                    ),
-                );
+            // let feature = self.features.entry(feature_id).read();
+        // assert(feature.is_active, 'Feature inactive');
+
+            // if feature.price > 0 {
+        //     let payment_amount = u256 { low: feature.price.into(), high: 0 };
+        //     let erc20 = IERC20Dispatcher { contract_address: token_contract };
+        //     let success = erc20
+        //         .transfer_from(get_caller_address(), get_contract_address(), payment_amount);
+        //     assert(success, 'Payment failed');
+
+            //     let current_balance = self.feature_balances.entry(feature_id).read();
+        //     self
+        //         .feature_balances
+        //         .entry(feature_id)
+        //         .write(current_balance + feature.price.into());
+
+            //     let current_tvl = self.protocol_tvl.entry(feature.coin_type).read();
+        //     self.protocol_tvl.write(feature.coin_type, current_tvl + feature.price.into());
+        // }
+
+            // self.access_nullifiers.write(access_nullifier, true);
+        // self
+        //     .emit(
+        //         Event::FeatureAccessed(
+        //             FeatureAccessedEvent { feature_id, caller: get_caller_address() },
+        //         ),
+        //     );
         }
 
 
@@ -324,14 +330,14 @@ mod IZkBadgeImpl {
             let (is_valid, public_inputs) = verify_honk_proof(full_proof_with_hints);
             assert(is_valid, 'Invalid proof');
 
-            let cert_hash = extract_public_inputs(public_inputs, 3, 0);
-            let access_nullifier = extract_public_inputs(public_inputs, 3, 1);
-            let vote_nullifier = extract_public_inputs(public_inputs, 3, 2);
+            let cert_hash = *public_inputs.at(0);
+            let access_nullifier = *public_inputs.at(1);
+            let age_ok_flag = *public_inputs.at(2);
 
-            assert(
-                self.registered_hashes.entry(cert_hash).read() == Status::Verified(()),
-                'Cert not verified',
-            );
+            match self.registered_hashes.entry(cert_hash).read() {
+                Status::Verified(()) => {},
+                _ => { assert(false, 'Cert not verified'); },
+            }
             assert(self.access_nullifiers.entry(access_nullifier).read(), 'Must access first');
             assert(!self.vote_nullifiers.entry(vote_nullifier).read(), 'Already voted');
 
@@ -345,7 +351,12 @@ mod IZkBadgeImpl {
             }
             self.feature_vote_tallies.entry(feature_id).write(tally);
 
-            self.emit(Event::FeatureVoted(FeatureVotedEvent { feature_id, like }));
+            self
+                .emit(
+                    Event::FeatureVoted(
+                        FeatureVotedEvent { feature_id, vote: like, caller: get_caller_address() },
+                    ),
+                );
         }
 
 
@@ -363,11 +374,11 @@ mod IZkBadgeImpl {
             let success = erc20.transfer(feature.creator, amount);
             assert(success, 'Withdraw failed');
 
-            self.feature_balances.write(feature_id, 0);
+            self.feature_balances.entry(feature_id).write(0);
         }
 
 
-        fn is_certificate_verified(self: @ContractState, cert_hash: felt252) -> bool {
+        fn is_certificate_verified(self: @ContractState, cert_hash: u256) -> bool {
             match self.registered_hashes.entry(cert_hash).read() {
                 Status::Verified(()) => true,
                 _ => false,
@@ -385,7 +396,7 @@ mod IZkBadgeImpl {
         }
 
 
-        fn get_owner_certificate(self: @ContractState, owner: ContractAddress) -> felt252 {
+        fn get_owner_certificate(self: @ContractState, owner: ContractAddress) -> u256 {
             self.certificate_owners.entry(owner).read()
         }
     }
