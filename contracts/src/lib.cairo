@@ -8,7 +8,7 @@ struct Feature {
     description: ByteArray,
     category: ByteArray,
     image_url: ByteArray,
-    min_age: u16,
+    min_age: u256,
     price: u64,
     created_at: u64,
     is_active: bool,
@@ -280,19 +280,18 @@ mod IZkBadgeImpl {
             let (is_valid, public_inputs) = verify_honk_proof(full_proof_with_hints);
             assert(is_valid, 'Invalid proof');
 
+            let feature = self.features.entry(feature_id).read();
+            assert(feature.is_active, 'Feature inactive');
+
             let cert_hash = *public_inputs.at(0);
-            let access_nullifier = *public_inputs.at(1);
-            let age_ok_flag = *public_inputs.at(2);
+            let age_ok_flag = *public_inputs.at(1);
 
             match self.registered_hashes.entry(cert_hash).read() {
                 Status::Verified(()) => {},
                 _ => { assert(false, 'Cert not verified'); },
             }
-            // assert(age_ok_flag == 1, 'Age verification failed');
-        // assert(!self.access_nullifiers.entry(access_nullifier).read(), 'Already accessed');
-
-            // let feature = self.features.entry(feature_id).read();
-        // assert(feature.is_active, 'Feature inactive');
+            assert(age_ok_flag >= feature.min_age, 'Age verification failed');
+            // assert(!self.access_nullifiers.entry(access_nullifier).read(), 'Already accessed');
 
             // if feature.price > 0 {
         //     let payment_amount = u256 { low: feature.price.into(), high: 0 };
@@ -331,8 +330,7 @@ mod IZkBadgeImpl {
             assert(is_valid, 'Invalid proof');
 
             let cert_hash = *public_inputs.at(0);
-            let access_nullifier = *public_inputs.at(1);
-            let age_ok_flag = *public_inputs.at(2);
+            let vote_nullifier = *public_inputs.at(1);
 
             match self.registered_hashes.entry(cert_hash).read() {
                 Status::Verified(()) => {},
