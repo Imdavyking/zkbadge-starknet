@@ -183,7 +183,7 @@ mod IZkBadgeImpl {
                 .unwrap_syscall();
 
             let public_inputs = Serde::<Option<Span<u256>>>::deserialize(ref result)
-                .expect('Deserialization failed')
+                .unwrap()
                 .expect('Proof is invalid');
             (true, public_inputs)
         }
