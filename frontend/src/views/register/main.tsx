@@ -113,17 +113,22 @@ export default function RegisterCertForm() {
 
       const zk_data: ZkProofInput = {
         issuer: `0x${input.issuer.toString(16)}`,
-        issued_at: `0x${input.issued_at.toString(16)}`,
-        valid_until: `0x${input.valid_until.toString(16)}`,
+        // Convert u64 to BigInt and pad to 64 bits
+        issued_at: `0x${BigInt(input.issued_at)
+          .toString(16)
+          .padStart(16, "0")}`,
+        valid_until: `0x${BigInt(input.valid_until)
+          .toString(16)
+          .padStart(16, "0")}`,
         is_valid: !!input.is_valid,
         secret: `0x${input.secret.toString(16)}`,
-        year_of_birth: yob,
+        year_of_birth: Number(yob), // Ensure it's a number, not string
         hash: `0x${hash.toString(16)}`,
-        min_age_feature: 0,
+        min_age_feature: Number(18), // Explicitly convert to number
         access_nullifier: accessNullifierHash,
-        now: `0x${input.now.toString(16)}`,
+        now: `0x${BigInt(input.now).toString(16).padStart(16, "0")}`,
         owner: `0x${input.owner.toString(16)}`,
-        current_year: input.current_year,
+        current_year: Number(input.current_year),
       };
 
       const { callData } = await generateProof(zk_data);
