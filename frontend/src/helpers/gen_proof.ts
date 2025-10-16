@@ -12,14 +12,13 @@ import vkUrl from "../assets/vk.bin?url";
 
 export function useZkVerifier() {
   const [vk, setVk] = useState<Uint8Array | null>(null);
-  const [noir, setNoir] = useState<Noir | null>(null);
 
   /** Initialize Noir and WASM once */
   useEffect(() => {
     const initWasm = async () => {
       try {
         await Promise.all([initACVM(fetch(acvm)), initNoirC(fetch(noirc))]);
-        setNoir(new Noir(circuit as CompiledCircuit));
+
         console.log("✅ Noir initialized");
       } catch (err) {
         console.error("Failed to initialize Noir/ACVM:", err);
@@ -39,13 +38,18 @@ export function useZkVerifier() {
 
   /** Generate proof */
   const generateProof = async (input: Record<string, any>) => {
-    if (!noir || !vk) throw new Error("Verifier not initialized yet");
+    if (!vk) throw new Error("Verifier not initialized yet");
+
+    let noir = new Noir({
+      bytecode: circuit.bytecode,
+      abi: circuit.abi as any,
+    });
 
     console.log("🧮 Generating witness...");
     const execResult = await noir.execute(input);
 
     console.log("🔒 Generating proof...");
-    const honk = new UltraHonkBackend(circuit.bytecode, { threads: 1 });
+    const honk = new UltraHonkBackend(circuit.bytecode, { threads: 5 });
 
     const proof = await honk.generateProof(execResult.witness, {
       starknet: true,
@@ -64,5 +68,5 @@ export function useZkVerifier() {
     return { proof, callData };
   };
 
-  return { vk, noir, generateProof };
+  return { generateProof };
 }
