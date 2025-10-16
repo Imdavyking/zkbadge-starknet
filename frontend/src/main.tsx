@@ -3,12 +3,12 @@ import { createRoot, type Container } from "react-dom/client";
 import "./index.css";
 import App from "./App.js";
 
-import { StarknetProvider } from "./providers/StarknetProvider";
+// import { StarknetProvider } from "./providers/StarknetProvider";
 
 createRoot(document.getElementById("root") as Container).render(
   <StrictMode>
-    <StarknetProvider>
+    {/* <StarknetProvider> */}
       <App />
-    </StarknetProvider>
+    {/* </StarknetProvider> */}
   </StrictMode>
 );
