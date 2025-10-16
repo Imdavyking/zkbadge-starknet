@@ -6,7 +6,6 @@ import {
 } from "starknetkit";
 export default function ConnectWalletButton() {
   const { address } = useAccount();
-  const { connect } = useConnect();
   const { disconnect } = useDisconnect();
   const { connectAsync, connectors } = useConnect();
 
