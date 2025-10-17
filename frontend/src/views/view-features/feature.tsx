@@ -31,7 +31,7 @@ export const Feature = (feature: FeatureJson) => {
 
   const { contract: erc20Contract } = useContract({
     abi: erc20Abi,
-    address: CONTRACT_ADDRESS,
+    address: NATIVE_TOKEN,
   });
 
   const { sendAsync: approveToken } = useSendTransaction({
@@ -81,6 +81,9 @@ export const Feature = (feature: FeatureJson) => {
   const handleLike = async () => {
     try {
       setIsLiking(true);
+    } catch (err: any) {
+      toast.error(err?.message);
+      setError(err?.message ?? String(err));
     } finally {
       setIsLiking(false);
     }
@@ -91,6 +94,9 @@ export const Feature = (feature: FeatureJson) => {
       setIsDisliking(true);
 
       console.log(`Disliked feature ${feature.id}`);
+    } catch (err: any) {
+      toast.error(err?.message);
+      setError(err?.message ?? String(err));
     } finally {
       setIsDisliking(false);
     }
@@ -98,6 +104,7 @@ export const Feature = (feature: FeatureJson) => {
 
   const handleAccess = async () => {
     try {
+      setIsAccessing(true);
       if (!certJson) {
         toast.error("Upload your certificate");
         return;
@@ -121,7 +128,9 @@ export const Feature = (feature: FeatureJson) => {
       await account?.waitForTransaction(tx2.transaction_hash);
 
       toast.success("Access created successfully");
-      setIsAccessing(true);
+    } catch (err: any) {
+      toast.error(err?.message);
+      setError(err?.message ?? String(err));
     } finally {
       setIsAccessing(false);
     }
