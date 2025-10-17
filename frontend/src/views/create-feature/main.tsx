@@ -26,7 +26,7 @@ export default function CreateFeatureForm() {
   const [imageUrl, setImageUrl] = useState(
     "https://media.istockphoto.com/id/471519418/photo/male-teenage-driver-looking-out-of-car-window.jpg?s=612x612&w=0&k=20&c=xDd2U49KiXzrxPWKG3X6tLUYIzpd8YcYwYCiXiB0Z-M="
   );
-  const [price, setPrice] = useState(100);
+  const [price, setPrice] = useState(0.01);
   const [createdAt, setCreatedAt] = useState(currentISOForInput(0));
   const { address, account } = useAccount();
   const [submitting, setSubmitting] = useState(false);
