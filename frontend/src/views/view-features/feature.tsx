@@ -38,7 +38,7 @@ export const Feature = (feature: FeatureJson) => {
   const { sendAsync: approveToken } = useSendTransaction({
     calls:
       erc20Contract && address
-        ? [erc20Contract.populate("approve", [NATIVE_TOKEN, feature.price])]
+        ? [erc20Contract.populate("approve", [CONTRACT_ADDRESS, feature.price])]
         : undefined,
   });
 
@@ -119,6 +119,8 @@ export const Feature = (feature: FeatureJson) => {
         address!,
         CONTRACT_ADDRESS, // Check allowance for MAIN CONTRACT
       ]);
+
+      console.log({ allowanceResult });
 
       if (Number(allowanceResult) < Math.trunc(feature.price * 10 ** 18)) {
         const transaction = await approveToken();
