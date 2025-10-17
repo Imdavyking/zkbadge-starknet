@@ -114,6 +114,7 @@ export default function RegisterCertForm() {
 
       // Chain poseidon2 hashes just like in Cairo
       let hash = poseidon2Hash(fields);
+      console.log(`cert hash : ${hash}`);
       let accessNullifierHash: `0x${string}` = `0x${poseidon2Hash([
         hash,
         input.secret,
@@ -138,6 +139,8 @@ export default function RegisterCertForm() {
         owner: `0x${input.owner.toString(16)}`,
         current_year: Number(input.current_year),
       };
+
+      console.log(`zk data : ${JSON.stringify(zk_data)}`);
 
       const { callData: proofCallData } = await generateProof(zk_data);
       console.log(proofCallData.slice(1));

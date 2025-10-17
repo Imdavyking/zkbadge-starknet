@@ -65,7 +65,8 @@ pub trait IZkBadge<TContractState> {
     fn get_feature_votes(self: @TContractState, feature_id: u64) -> VoteTally;
     fn get_feature_info(self: @TContractState, feature_id: u64) -> Feature;
     fn get_owner_certificate(self: @TContractState, owner: ContractAddress) -> u256;
-    fn get_verifier_classhash(self: @TContractState) -> felt252;
+    fn get_verifier_contract_address(self: @TContractState) -> felt252;
+   
 }
 
 #[starknet::contract]
@@ -109,7 +110,7 @@ mod IZkBadgeImpl {
         feature_vote_tallies: Map<u64, VoteTally>,
         verified_users: Map<ContractAddress, bool>,
         user_feature_access: Map<(ContractAddress, u64), bool>,
-        verifier_classhash: ClassHash,
+        verifier_contract_address: ContractAddress,
     }
 
     #[constructor]
@@ -117,9 +118,9 @@ mod IZkBadgeImpl {
         let salt = 0;
         let unique = false;
         let mut calldata = array![];
-        let (_contract_address, _) = deploy_syscall(class_hash, salt, calldata.span(), unique)
+        let (contract_address, _) = deploy_syscall(class_hash, salt, calldata.span(), unique)
             .unwrap();
-        self.verifier_classhash.write(class_hash);
+        self.verifier_contract_address.write(contract_address);
         let tx_info = get_tx_info();
         self.feature_counter.write(0);
         self.admin.write(tx_info.account_contract_address);
@@ -175,8 +176,8 @@ mod IZkBadgeImpl {
         fn verify_honk_proof(
             ref self: ContractState, full_proof_with_hints: Span<felt252>,
         ) -> (bool, Span<u256>) {
-            let mut result = syscalls::library_call_syscall(
-                self.verifier_classhash.read().try_into().unwrap(),
+            let mut result = syscalls::call_contract_syscall(
+                self.verifier_contract_address.read().try_into().unwrap(),
                 selector!("verify_ultra_starknet_honk_proof"),
                 full_proof_with_hints,
             )
@@ -187,7 +188,6 @@ mod IZkBadgeImpl {
                 .expect('Proof is invalid');
             (true, public_inputs)
         }
-
 
         fn add_trusted_issuer(ref self: ContractState, issuer: ContractAddress) {
             assert(get_caller_address() == self.admin.read(), 'Only admin');
@@ -414,8 +414,8 @@ mod IZkBadgeImpl {
             self.certificate_owners.entry(owner).read()
         }
 
-        fn get_verifier_classhash(self: @ContractState) -> felt252 {
-              self.verifier_classhash.read().try_into().unwrap()
+        fn get_verifier_contract_address(self: @ContractState) -> felt252 {
+              self.verifier_contract_address.read().try_into().unwrap()
         }
     }
 }
