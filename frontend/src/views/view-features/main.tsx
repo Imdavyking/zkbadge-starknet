@@ -34,7 +34,7 @@ const ViewFeatures: React.FC = () => {
   const [features, setFeatures] = React.useState<FeatureJson[]>([]);
   const [loading, setLoading] = React.useState(true);
   const featureIds = Array.from({ length: 10 }, (_, i) => i);
-  const [featureLoading, setFeatureLoading] = React.useState(false);
+  const [featureLoaded, setFeatureLoaded] = React.useState(false);
 
   const results = featureIds.map((id) =>
     useReadContract({
@@ -47,7 +47,8 @@ const ViewFeatures: React.FC = () => {
   );
 
   useEffect(() => {
-    if (features.length > 0 || !featureLoading) return;
+    if (features.length > 0) return;
+    if (featureLoaded) return;
     const datas: FeatureJson[] = [];
     results.forEach(({ data, error }, i) => {
       if (error) console.error(`Error reading feature ${i}:`, error);
@@ -69,7 +70,8 @@ const ViewFeatures: React.FC = () => {
           coin_type: data.coin_type,
         });
       }
-      setFeatureLoading(false);
+      console.log(data);
+      setFeatureLoaded(results[0].isSuccess);
       setFeatures(datas);
       setLoading(false);
     });
