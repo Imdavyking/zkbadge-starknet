@@ -38,7 +38,12 @@ export const Feature = (feature: FeatureJson) => {
   const { sendAsync: approveToken } = useSendTransaction({
     calls:
       erc20Contract && address
-        ? [erc20Contract.populate("approve", [CONTRACT_ADDRESS, feature.price])]
+        ? [
+            erc20Contract.populate("approve", [
+              CONTRACT_ADDRESS,
+              Math.trunc(feature.price * 10 ** 18),
+            ]),
+          ]
         : undefined,
   });
 
