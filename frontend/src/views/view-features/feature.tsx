@@ -5,12 +5,14 @@ import { useEffect, useState } from "react";
 import { FaSpinner } from "react-icons/fa";
 import { toast } from "react-toastify";
 import erc20Abi from "../../assets/json/erc20";
+import abi from "../../assets/json/abi";
 import type { ZkProofInput } from "@/lib/common-types";
 import {
   useAccount,
   useContract,
   useSendTransaction,
 } from "@starknet-react/core";
+import { useZkVerifier } from "../../helpers/gen_proof";
 
 export const Feature = (feature: FeatureJson) => {
   const [isLiking, setIsLiking] = useState(false);
@@ -23,6 +25,8 @@ export const Feature = (feature: FeatureJson) => {
   const [voteData, setVoteData] = useState<{ up: bigint; down: bigint } | null>(
     null
   );
+  const { generateProof } = useZkVerifier();
+  const [proof, setProof] = useState<bigint[]>([]);
   const { address, account } = useAccount();
 
   const { contract: erc20Contract } = useContract({
@@ -34,6 +38,24 @@ export const Feature = (feature: FeatureJson) => {
     calls:
       erc20Contract && address
         ? [erc20Contract.populate("approve", [NATIVE_TOKEN, feature.price])]
+        : undefined,
+  });
+
+  const { contract } = useContract({
+    abi,
+    address: CONTRACT_ADDRESS,
+  });
+
+  const { sendAsync: accessFeature } = useSendTransaction({
+    calls:
+      contract && address
+        ? [
+            contract.populate("access_private_feature", [
+              BigInt(feature.id),
+              proof,
+              NATIVE_TOKEN,
+            ]),
+          ]
         : undefined,
   });
 
@@ -76,12 +98,25 @@ export const Feature = (feature: FeatureJson) => {
 
   const handleAccess = async () => {
     try {
+      if (!certJson) {
+        toast.error("Upload your certificate");
+        return;
+      }
       const transaction = await approveToken();
 
       if (transaction?.transaction_hash) {
         console.log("Transaction submitted:", transaction.transaction_hash);
       }
       await account?.waitForTransaction(transaction.transaction_hash);
+
+      const { callData: proofCallData } = await generateProof(certJson);
+      setProof(proofCallData.slice(1));
+
+      const tx2 = await accessFeature();
+      if (tx2?.transaction_hash) {
+        console.log("Transaction submitted:", tx2.transaction_hash);
+      }
+      await account?.waitForTransaction(tx2.transaction_hash);
 
       toast.success("Access created successfully");
       setIsAccessing(true);
