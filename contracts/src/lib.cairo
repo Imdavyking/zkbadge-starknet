@@ -271,8 +271,8 @@ mod IZkBadgeImpl {
             feature_id: u64,
             full_proof_with_hints: Span<felt252>
         ) {
-            // let (is_valid, public_inputs) = self.verify_honk_proof(full_proof_with_hints);
-            // assert(is_valid, 'Invalid proof');
+            let (is_valid, public_inputs) = self.verify_honk_proof(full_proof_with_hints);
+            assert(is_valid, 'Invalid proof');
             // let caller = get_caller_address();
             // let user_access = self.user_feature_access.entry((caller, feature_id));
             // assert(!user_access.read(), 'Invalid proof');
