@@ -166,7 +166,8 @@ export default function CreateFeatureForm() {
           <label className="mb-2 block text-sm font-medium">Price</label>
           <input
             type="number"
-            min={0}
+            min={0.00000000001}
+            step={0.001}
             className="w-full rounded-xl border border-gray-300 px-3 py-2"
             value={price}
             onChange={(e) => setPrice(parseFloat(e.target.value))}
