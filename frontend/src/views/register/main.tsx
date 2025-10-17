@@ -11,6 +11,7 @@ import { FaSpinner } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { useZkVerifier } from "../../helpers/gen_proof";
 import type { ZkProofInput } from "@/lib/common-types";
+import { sleep } from "../../utils/helpers";
 
 function toMsBigIntFromLocalDateTime(value: string): bigint {
   const ms = Date.parse(value);
@@ -147,6 +148,8 @@ export default function RegisterCertForm() {
       const { callData: proofCallData } = await generateProof(zk_data);
       console.log(proofCallData.slice(1));
       setCallData(proofCallData);
+
+      await sleep(2000);
 
       const transaction = await registerUser();
 

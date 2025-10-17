@@ -13,6 +13,7 @@ import {
   useSendTransaction,
 } from "@starknet-react/core";
 import { useZkVerifier } from "../../helpers/gen_proof";
+import { sleep } from "../../utils/helpers";
 
 export const Feature = (feature: FeatureJson) => {
   const [isLiking, setIsLiking] = useState(false);
@@ -113,6 +114,7 @@ export const Feature = (feature: FeatureJson) => {
       const proofData = proofCallData.slice(1);
       console.log({ proofData });
       setProof(proofData);
+      await sleep(2000);
       const transaction = await approveToken();
 
       if (transaction?.transaction_hash) {

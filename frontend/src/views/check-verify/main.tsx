@@ -3,7 +3,7 @@ import { toast } from "react-toastify";
 import { useReadContract } from "@starknet-react/core";
 import { CONTRACT_ADDRESS } from "../../utils/constants";
 import abi from "../../assets/json/abi";
-
+import { sleep } from "../../utils/helpers";
 import React from "react";
 import { poseidon2Hash } from "@zkpassport/poseidon2";
 import type { ZkProofInput } from "@/lib/common-types";
@@ -63,6 +63,8 @@ const VerifyBadge = () => {
       ];
 
       setHash(poseidon2Hash(fields));
+
+      await sleep(2000);
 
       if (isCertVerified) {
         toast.success("Certificate verified successfully!");

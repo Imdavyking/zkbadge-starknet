@@ -273,11 +273,11 @@ mod IZkBadgeImpl {
         ) {
             let (is_valid, public_inputs) = self.verify_honk_proof(full_proof_with_hints);
             assert(is_valid, 'Invalid proof');
-            // let caller = get_caller_address();
-            // let user_access = self.user_feature_access.entry((caller, feature_id));
-            // assert(!user_access.read(), 'Invalid access');
-            // let feature = self.features.entry(feature_id).read();
-            // assert(feature.is_active, 'Feature inactive');
+            let caller = get_caller_address();
+            let user_access = self.user_feature_access.entry((caller, feature_id));
+            assert(!user_access.read(), 'Invalid access');
+            let feature = self.features.entry(feature_id).read();
+            assert(feature.is_active, 'Feature inactive');
 
             // let cert_hash = *public_inputs.at(0);
             // let min_age_feature = *public_inputs.at(1);
