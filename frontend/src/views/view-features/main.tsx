@@ -1,5 +1,4 @@
 import React, { useEffect } from "react";
-import { toast } from "react-toastify";
 import { Feature } from "./feature";
 import { useReadContract } from "@starknet-react/core";
 import { CONTRACT_ADDRESS } from "../../utils/constants";
@@ -27,26 +26,6 @@ export type FeatureJson = {
 //
 
 // Convert {0: 99, 1: 206, ...} into Uint8Array → hex string
-function bytesToHex(bytesObj: Record<string, number>): string {
-  const bytes = Object.values(bytesObj);
-  return "0x" + Buffer.from(bytes).toString("hex");
-}
-
-function mapStateFeature(raw: any): FeatureJson {
-  return {
-    id: raw.id,
-    creator: bytesToHex(raw.feature.creator.bytes),
-    name: raw.feature.name,
-    description: raw.feature.description,
-    category: raw.feature.category,
-    image_url: raw.feature.image_url,
-    min_age: Number(raw.feature.min_age),
-    price: Number(raw.feature.price),
-    created_at: Number(raw.feature.created_at),
-    is_active: raw.feature.is_active,
-    coin_type: bytesToHex(raw.feature.coin_type),
-  };
-}
 
 //
 // ------------------- Component -------------------

@@ -1,7 +1,7 @@
 import { ellipsify } from "../../utils/ellipsify";
 import type { FeatureJson } from "./main";
 import { CONTRACT_ADDRESS, NATIVE_TOKEN } from "../../utils/constants";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { FaSpinner } from "react-icons/fa";
 import { toast } from "react-toastify";
 import erc20Abi from "../../assets/json/erc20";

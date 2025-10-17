@@ -50,8 +50,7 @@ pub trait IZkBadge<TContractState> {
     fn access_private_feature(
         ref self: TContractState,
         feature_id: u64,
-        full_proof_with_hints: Span<felt252>,
-        token_contract: ContractAddress,
+        full_proof_with_hints: Span<felt252>
     );
     fn vote_on_feature(
         ref self: TContractState, feature_id: u64, like: bool, full_proof_with_hints: Span<felt252>,
@@ -269,11 +268,10 @@ mod IZkBadgeImpl {
         fn access_private_feature(
             ref self: ContractState,
             feature_id: u64,
-            full_proof_with_hints: Span<felt252>,
-            token_contract: ContractAddress,
+            full_proof_with_hints: Span<felt252>
         ) {
-            let (is_valid, public_inputs) = self.verify_honk_proof(full_proof_with_hints);
-            assert(is_valid, 'Invalid proof');
+            // let (is_valid, public_inputs) = self.verify_honk_proof(full_proof_with_hints);
+            // assert(is_valid, 'Invalid proof');
             // let caller = get_caller_address();
             // let user_access = self.user_feature_access.entry((caller, feature_id));
             // assert(!user_access.read(), 'Invalid proof');
@@ -298,7 +296,7 @@ mod IZkBadgeImpl {
             // user_access.write(true);
 
             // if feature.price > 0 {
-            //     let erc20 = IERC20Dispatcher { contract_address: token_contract };
+            //     let erc20 = IERC20Dispatcher { contract_address: self.get_strk_address() };
             //     let success = erc20
             //         .transfer_from(get_caller_address(), get_contract_address(), feature.price);
             //     assert(success, 'Payment failed');
@@ -409,6 +407,20 @@ mod IZkBadgeImpl {
 
         fn get_verifier_address(self: @ContractState) -> felt252 {
               self.verifier_address.read().try_into().unwrap()
+        }
+    }
+
+     #[generate_trait]
+    impl Private of PrivateTrait {
+        fn get_strk_address(self: @ContractState) -> ContractAddress {
+            contract_address_const::<
+                0x4718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d,
+            >()
+        }
+        fn get_eth_address(self: @ContractState) -> ContractAddress {
+            contract_address_const::<
+                0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7,
+            >()
         }
     }
 }
