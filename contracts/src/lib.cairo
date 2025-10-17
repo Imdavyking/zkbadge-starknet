@@ -279,46 +279,46 @@ mod IZkBadgeImpl {
             let feature = self.features.entry(feature_id).read();
             assert(feature.is_active, 'Feature inactive');
 
-            // let cert_hash = *public_inputs.at(0);
-            // let min_age_feature = *public_inputs.at(1);
-            // let access_nullifier = *public_inputs.at(2);
-            // let _current_time = *public_inputs.at(3);
+            let cert_hash = *public_inputs.at(0);
+            let min_age_feature = *public_inputs.at(1);
+            let access_nullifier = *public_inputs.at(2);
+            let _current_time = *public_inputs.at(3);
 
-            // // CRITICAL: Check nullifier hasn't been spent globally
-            // assert(
-            //     !self.access_nullifiers.entry(access_nullifier).read(), 'Nullifier already spent',
-            // );
+            // CRITICAL: Check nullifier hasn't been spent globally
+            assert(
+                !self.access_nullifiers.entry(access_nullifier).read(), 'Nullifier already spent',
+            );
 
-            // match self.registered_hashes.entry(cert_hash).read() {
-            //     Status::Verified(()) => {},
-            //     _ => { assert(false, 'Cert not verified'); },
-            // }
-            // assert(min_age_feature >= feature.min_age, 'Age verification failed');
-            // user_access.write(true);
+            match self.registered_hashes.entry(cert_hash).read() {
+                Status::Verified(()) => {},
+                _ => { assert(false, 'Cert not verified'); },
+            }
+            assert(min_age_feature >= feature.min_age, 'Age verification failed');
+            user_access.write(true);
 
-            // if feature.price > 0 {
-            //     let erc20 = IERC20Dispatcher { contract_address: self.get_strk_address() };
-            //     let success = erc20
-            //         .transfer_from(get_caller_address(), get_contract_address(), feature.price);
-            //     assert(success, 'Payment failed');
-            //     let current_balance = self.feature_balances.entry(feature_id).read();
-            //     self
-            //         .feature_balances
-            //         .entry(feature_id)
-            //         .write(current_balance + feature.price.into());
-            //     let current_tvl = self.protocol_tvl.entry(feature.coin_type).read();
-            //     self
-            //         .protocol_tvl
-            //         .entry(feature.coin_type)
-            //         .write(current_tvl + feature.price.into());
-            // }
-            // self
-            //     .emit(
-            //         Event::FeatureAccessed(
-            //             FeatureAccessedEvent { feature_id, caller: get_caller_address() },
-            //         ),
-            //     );
-            // self.user_feature_access.entry((caller, feature_id)).write(true);
+            if feature.price > 0 {
+                let erc20 = IERC20Dispatcher { contract_address: self.get_strk_address() };
+                let success = erc20
+                    .transfer_from(get_caller_address(), get_contract_address(), feature.price);
+                assert(success, 'Payment failed');
+                let current_balance = self.feature_balances.entry(feature_id).read();
+                self
+                    .feature_balances
+                    .entry(feature_id)
+                    .write(current_balance + feature.price.into());
+                let current_tvl = self.protocol_tvl.entry(feature.coin_type).read();
+                self
+                    .protocol_tvl
+                    .entry(feature.coin_type)
+                    .write(current_tvl + feature.price.into());
+            }
+            self
+                .emit(
+                    Event::FeatureAccessed(
+                        FeatureAccessedEvent { feature_id, caller: get_caller_address() },
+                    ),
+                );
+            self.user_feature_access.entry((caller, feature_id)).write(true);
         }
 
 

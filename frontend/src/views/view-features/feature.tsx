@@ -41,7 +41,7 @@ export const Feature = (feature: FeatureJson) => {
         ? [
             erc20Contract.populate("approve", [
               CONTRACT_ADDRESS,
-              Math.trunc(feature.price * 10 ** 18),
+              Math.trunc(feature.price),
             ]),
           ]
         : undefined,
@@ -127,7 +127,7 @@ export const Feature = (feature: FeatureJson) => {
 
       console.log({ allowanceResult });
 
-      if (Number(allowanceResult) < Math.trunc(feature.price * 10 ** 18)) {
+      if (Number(allowanceResult) < Math.trunc(feature.price)) {
         const transaction = await approveToken();
 
         if (transaction?.transaction_hash) {
