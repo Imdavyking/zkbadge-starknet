@@ -37,8 +37,6 @@ export const Feature = (feature: FeatureJson) => {
     }
   };
 
- 
-
   const handleLike = async () => {
     try {
       setIsLiking(true);
@@ -87,7 +85,7 @@ export const Feature = (feature: FeatureJson) => {
         <span className="mr-3">
           💰{" "}
           {feature.price > 0
-            ? `${feature.price} ${
+            ? `${feature.price / 10 ** 18} ${
                 NATIVE_TOKEN == feature.coin_type ? "STRK" : "Unknown Token"
               }`
             : "Free"}
