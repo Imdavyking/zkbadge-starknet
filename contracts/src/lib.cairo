@@ -84,6 +84,7 @@ mod IZkBadgeImpl {
     use crate::{Feature, VoteTally};
     use super::IZkBadge;
     use crate::verifier::{IVerifierDispatcher, IVerifierDispatcherTrait};
+    use starknet::contract_address::contract_address_const;
 
 
     // Enums
