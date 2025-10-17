@@ -13,6 +13,15 @@ const VerifyBadge = () => {
   const [status, setStatus] = useState("");
   const [error, setError] = useState("");
   const [certJson, setCertJson] = useState<ZkProofInput | null>(null);
+  const [hash, setHash] = useState(BigInt(0));
+
+  const { data: isCertVerified } = useReadContract({
+    abi: abi,
+    functionName: "is_certificate_verified",
+    address: CONTRACT_ADDRESS,
+    args: [hash],
+    watch: true,
+  });
 
   // Handle user uploading JSON file
   const handleFileUpload = async (
@@ -53,14 +62,8 @@ const VerifyBadge = () => {
         BigInt(certJson.year_of_birth),
       ];
 
-      let hash = poseidon2Hash(fields);
-      const { data: isCertVerified } = useReadContract({
-        abi: abi,
-        functionName: "is_certificate_verified",
-        address: CONTRACT_ADDRESS,
-        args: [hash],
-        watch: true,
-      });
+      setHash(poseidon2Hash(fields));
+
       if (isCertVerified) {
         toast.success("Certificate verified successfully!");
         setStatus("✅ Certificate is valid.");

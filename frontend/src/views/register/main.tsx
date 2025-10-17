@@ -112,6 +112,8 @@ export default function RegisterCertForm() {
         input.year_of_birth,
       ];
 
+      console.log(fields);
+
       // Chain poseidon2 hashes just like in Cairo
       let hash = poseidon2Hash(fields);
       console.log(`cert hash : ${hash}`);
