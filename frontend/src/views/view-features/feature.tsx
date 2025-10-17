@@ -120,7 +120,6 @@ export const Feature = (feature: FeatureJson) => {
         console.log("Transaction submitted:", transaction.transaction_hash);
       }
       await account?.waitForTransaction(transaction.transaction_hash);
-
       const tx2 = await accessFeature();
       if (tx2?.transaction_hash) {
         console.log("Transaction submitted:", tx2.transaction_hash);
