@@ -79,7 +79,6 @@ const Home = () => {
       {/* Footer */}
       <footer className="bg-white text-center py-8 border-t text-sm text-gray-500">
         © {new Date().getFullYear()} ZK Badge • Built with Noir & Cairo
-        Knowledge
       </footer>
     </div>
   );
