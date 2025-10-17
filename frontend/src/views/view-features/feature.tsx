@@ -53,7 +53,6 @@ export const Feature = (feature: FeatureJson) => {
             contract.populate("access_private_feature", [
               BigInt(feature.id),
               proof,
-              NATIVE_TOKEN,
             ]),
           ]
         : undefined,
