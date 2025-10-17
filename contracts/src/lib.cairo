@@ -1,5 +1,6 @@
 use starknet::ContractAddress;
 pub mod erc20;
+pub mod verifier;
 
 #[derive(Drop, Serde, starknet::Store)]
 struct Feature {
@@ -31,9 +32,6 @@ trait IERC20<TContractState> {
 
 #[starknet::interface]
 pub trait IZkBadge<TContractState> {
-    fn verify_honk_proof(
-        ref self: TContractState, full_proof_with_hints: Span<felt252>,
-    ) -> (bool, Span<u256>);
     fn add_trusted_issuer(ref self: TContractState, issuer: ContractAddress);
     fn remove_trusted_issuer(ref self: TContractState, issuer: ContractAddress);
     fn register(ref self: TContractState, full_proof_with_hints: Span<felt252>);
@@ -65,7 +63,9 @@ pub trait IZkBadge<TContractState> {
     fn get_feature_votes(self: @TContractState, feature_id: u64) -> VoteTally;
     fn get_feature_info(self: @TContractState, feature_id: u64) -> Feature;
     fn get_owner_certificate(self: @TContractState, owner: ContractAddress) -> u256;
-    fn get_verifier_classhash(self: @TContractState) -> felt252;
+    fn get_verifier_address(self: @TContractState) -> felt252;
+    fn verify_honk_proof(
+            self: @TContractState, full_proof_with_hints: Span<felt252>) -> (bool, Span<u256>);
    
 }
 
@@ -84,6 +84,7 @@ mod IZkBadgeImpl {
     use crate::erc20::{IERC20Dispatcher, IERC20DispatcherTrait};
     use crate::{Feature, VoteTally};
     use super::IZkBadge;
+    use crate::verifier::{IVerifierDispatcher, IVerifierDispatcherTrait};
 
 
     // Enums
@@ -110,7 +111,7 @@ mod IZkBadgeImpl {
         feature_vote_tallies: Map<u64, VoteTally>,
         verified_users: Map<ContractAddress, bool>,
         user_feature_access: Map<(ContractAddress, u64), bool>,
-        verifier_classhash: ClassHash,
+        verifier_address: ContractAddress,
     }
 
     #[constructor]
@@ -118,9 +119,9 @@ mod IZkBadgeImpl {
         let salt = 0;
         let unique = false;
         let mut calldata = array![];
-        let (_contract_address, _) = deploy_syscall(class_hash, salt, calldata.span(), unique)
+        let (contract_address, _) = deploy_syscall(class_hash, salt, calldata.span(), unique)
             .unwrap();
-        self.verifier_classhash.write(class_hash);
+        self.verifier_address.write(contract_address);
         let tx_info = get_tx_info();
         self.feature_counter.write(0);
         self.admin.write(tx_info.account_contract_address);
@@ -173,21 +174,14 @@ mod IZkBadgeImpl {
 
     #[abi(embed_v0)]
     impl IZkBadgeImpl of IZkBadge<ContractState> {
-        fn verify_honk_proof(
-            ref self: ContractState, full_proof_with_hints: Span<felt252>,
-        ) -> (bool, Span<u256>) {
-            let mut result = syscalls::library_call_syscall(
-                self.verifier_classhash.read().try_into().unwrap(),
-                selector!("verify_ultra_starknet_honk_proof"),
-                full_proof_with_hints,
-            )
-                .unwrap_syscall();
 
-            let public_inputs = Serde::<Option<Span<u256>>>::deserialize(ref result)
-                .unwrap()
-                .expect('Proof is invalid');
-            (true, public_inputs)
+        fn verify_honk_proof(
+            self: @ContractState, full_proof_with_hints: Span<felt252>) -> (bool, Span<u256>)  {
+            let verifier = IVerifierDispatcher { contract_address: self.verifier_address.read() };
+            let result = verifier.verify_ultra_starknet_honk_proof(full_proof_with_hints).unwrap();
+            (true, result)
         }
+
 
         fn add_trusted_issuer(ref self: ContractState, issuer: ContractAddress) {
             assert(get_caller_address() == self.admin.read(), 'Only admin');
@@ -203,23 +197,23 @@ mod IZkBadgeImpl {
 
         fn register(ref self: ContractState, full_proof_with_hints: Span<felt252>) {
             let (is_valid, public_inputs) = self.verify_honk_proof(full_proof_with_hints);
-            // assert(is_valid, 'Invalid proof');
-            // let caller = get_caller_address();
-            // let cert_hash = *public_inputs.at(0);
+            assert(is_valid, 'Invalid proof');
+            let caller = get_caller_address();
+            let cert_hash = *public_inputs.at(0);
 
-            // let current_status = self.registered_hashes.entry(cert_hash).read();
-            // match current_status {
-            //     Status::Pending(()) => {},
-            //     Status::Verified(()) => { assert(false, 'Already verified'); },
-            //     Status::Revoked(()) => { assert(false, 'Certificate revoked'); },
-            //     _ => {},
-            // }
+            let current_status = self.registered_hashes.entry(cert_hash).read();
+            match current_status {
+                Status::Pending(()) => {},
+                Status::Verified(()) => { assert(false, 'Already verified'); },
+                Status::Revoked(()) => { assert(false, 'Certificate revoked'); },
+                _ => {},
+            }
 
-            // self.registered_hashes.entry(cert_hash).write(Status::Verified(()));
-            // self.certificate_owners.entry(caller).write(cert_hash);
-            // self.verified_users.entry(caller).write(true);
+            self.registered_hashes.entry(cert_hash).write(Status::Verified(()));
+            self.certificate_owners.entry(caller).write(cert_hash);
+            self.verified_users.entry(caller).write(true);
 
-            // self.emit(Event::CertificateVerified(CertificateVerifiedEvent { caller, cert_hash }));
+            self.emit(Event::CertificateVerified(CertificateVerifiedEvent { caller, cert_hash }));
         }
 
 
@@ -414,8 +408,8 @@ mod IZkBadgeImpl {
             self.certificate_owners.entry(owner).read()
         }
 
-        fn get_verifier_classhash(self: @ContractState) -> felt252 {
-              self.verifier_classhash.read().try_into().unwrap()
+        fn get_verifier_address(self: @ContractState) -> felt252 {
+              self.verifier_address.read().try_into().unwrap()
         }
     }
 }
