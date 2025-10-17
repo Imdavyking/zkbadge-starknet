@@ -38,8 +38,11 @@ const randomNonceBytesHex = (length: number): `0x${string}` => {
 };
 
 export default function RegisterCertForm() {
-  const [issuedAt, setIssuedAt] = useState(currentISOForInput(-1));
-  const [validUntil, setValidUntil] = useState(currentISOForInput(24 * 30));
+  // const [issuedAt, setIssuedAt] = useState(currentISOForInput(-1));
+  // const [validUntil, setValidUntil] = useState(currentISOForInput(24 * 30));
+  const [issuedAt, setIssuedAt] = useState(currentISOForInput(-2880)); // 2 days ago
+  const [validUntil, setValidUntil] = useState(currentISOForInput(40320)); // 28 days ahead (~next month - 2 days)
+
   const [isValid, setIsValid] = useState(true);
   const [yob, setYob] = useState(1999);
   const [issuerHex, setIssuerHex] = useState(randomNonceBytesHex(8));
