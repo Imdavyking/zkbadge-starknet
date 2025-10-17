@@ -102,15 +102,17 @@ export const Feature = (feature: FeatureJson) => {
         toast.error("Upload your certificate");
         return;
       }
+
+      const { callData: proofCallData } = await generateProof(certJson);
+      const proofData = proofCallData.slice(1);
+      console.log({ proofData });
+      setProof(proofData);
       const transaction = await approveToken();
 
       if (transaction?.transaction_hash) {
         console.log("Transaction submitted:", transaction.transaction_hash);
       }
       await account?.waitForTransaction(transaction.transaction_hash);
-
-      const { callData: proofCallData } = await generateProof(certJson);
-      setProof(proofCallData.slice(1));
 
       const tx2 = await accessFeature();
       if (tx2?.transaction_hash) {
