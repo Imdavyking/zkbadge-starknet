@@ -46,7 +46,7 @@ export default function CreateFeatureForm() {
               category,
               imageUrl,
               BigInt(minAge),
-              BigInt(price),
+              BigInt(Math.trunc(price * 10 ** 18)),
               NATIVE_TOKEN,
             ]),
           ]
