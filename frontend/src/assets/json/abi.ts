@@ -13,29 +13,11 @@ const contractAbi = [
     ],
   },
   {
-    type: "enum",
-    name: "core::bool",
-    variants: [
-      { name: "False", type: "()" },
-      { name: "True", type: "()" },
-    ],
-  },
-  {
     type: "struct",
     name: "core::integer::u256",
     members: [
       { name: "low", type: "core::integer::u128" },
       { name: "high", type: "core::integer::u128" },
-    ],
-  },
-  {
-    type: "struct",
-    name: "core::array::Span::<core::integer::u256>",
-    members: [
-      {
-        name: "snapshot",
-        type: "@core::array::Array::<core::integer::u256>",
-      },
     ],
   },
   {
@@ -48,6 +30,14 @@ const contractAbi = [
       },
       { name: "pending_word", type: "core::felt252" },
       { name: "pending_word_len", type: "core::integer::u32" },
+    ],
+  },
+  {
+    type: "enum",
+    name: "core::bool",
+    variants: [
+      { name: "False", type: "()" },
+      { name: "True", type: "()" },
     ],
   },
   {
@@ -81,23 +71,19 @@ const contractAbi = [
     ],
   },
   {
+    type: "struct",
+    name: "core::array::Span::<core::integer::u256>",
+    members: [
+      {
+        name: "snapshot",
+        type: "@core::array::Array::<core::integer::u256>",
+      },
+    ],
+  },
+  {
     type: "interface",
     name: "zkbadge::IZkBadge",
     items: [
-      {
-        type: "function",
-        name: "verify_honk_proof",
-        inputs: [
-          {
-            name: "full_proof_with_hints",
-            type: "core::array::Span::<core::felt252>",
-          },
-        ],
-        outputs: [
-          { type: "(core::bool, core::array::Span::<core::integer::u256>)" },
-        ],
-        state_mutability: "external",
-      },
       {
         type: "function",
         name: "add_trusted_issuer",
@@ -175,10 +161,6 @@ const contractAbi = [
             name: "full_proof_with_hints",
             type: "core::array::Span::<core::felt252>",
           },
-          {
-            name: "token_contract",
-            type: "core::starknet::contract_address::ContractAddress",
-          },
         ],
         outputs: [],
         state_mutability: "external",
@@ -241,6 +223,27 @@ const contractAbi = [
           },
         ],
         outputs: [{ type: "core::integer::u256" }],
+        state_mutability: "view",
+      },
+      {
+        type: "function",
+        name: "get_verifier_address",
+        inputs: [],
+        outputs: [{ type: "core::felt252" }],
+        state_mutability: "view",
+      },
+      {
+        type: "function",
+        name: "verify_honk_proof",
+        inputs: [
+          {
+            name: "full_proof_with_hints",
+            type: "core::array::Span::<core::felt252>",
+          },
+        ],
+        outputs: [
+          { type: "(core::bool, core::array::Span::<core::integer::u256>)" },
+        ],
         state_mutability: "view",
       },
     ],
