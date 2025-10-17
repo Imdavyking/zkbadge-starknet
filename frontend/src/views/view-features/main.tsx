@@ -92,7 +92,7 @@ const ViewFeatures: React.FC = () => {
       setFeatures(datas);
       setLoading(false);
     });
-  }, []);
+  }, [results]);
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
