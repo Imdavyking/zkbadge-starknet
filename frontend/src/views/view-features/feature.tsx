@@ -1,10 +1,16 @@
 import { ellipsify } from "../../utils/ellipsify";
 import type { FeatureJson } from "./main";
-import { NATIVE_TOKEN } from "../../utils/constants";
+import { CONTRACT_ADDRESS, NATIVE_TOKEN } from "../../utils/constants";
 import { useEffect, useState } from "react";
 import { FaSpinner } from "react-icons/fa";
 import { toast } from "react-toastify";
+import erc20Abi from "../../assets/json/erc20";
 import type { ZkProofInput } from "@/lib/common-types";
+import {
+  useAccount,
+  useContract,
+  useSendTransaction,
+} from "@starknet-react/core";
 
 export const Feature = (feature: FeatureJson) => {
   const [isLiking, setIsLiking] = useState(false);
@@ -17,6 +23,19 @@ export const Feature = (feature: FeatureJson) => {
   const [voteData, setVoteData] = useState<{ up: bigint; down: bigint } | null>(
     null
   );
+  const { address, account } = useAccount();
+
+  const { contract: erc20Contract } = useContract({
+    abi: erc20Abi,
+    address: CONTRACT_ADDRESS,
+  });
+
+  const { sendAsync: approveToken } = useSendTransaction({
+    calls:
+      erc20Contract && address
+        ? [erc20Contract.populate("approve", [NATIVE_TOKEN, feature.price])]
+        : undefined,
+  });
 
   // Handle user uploading JSON file
   const handleFileUpload = async (
@@ -57,6 +76,14 @@ export const Feature = (feature: FeatureJson) => {
 
   const handleAccess = async () => {
     try {
+      const transaction = await approveToken();
+
+      if (transaction?.transaction_hash) {
+        console.log("Transaction submitted:", transaction.transaction_hash);
+      }
+      await account?.waitForTransaction(transaction.transaction_hash);
+
+      toast.success("Access created successfully");
       setIsAccessing(true);
     } finally {
       setIsAccessing(false);
