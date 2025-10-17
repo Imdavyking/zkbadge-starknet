@@ -275,7 +275,7 @@ mod IZkBadgeImpl {
             assert(is_valid, 'Invalid proof');
             // let caller = get_caller_address();
             // let user_access = self.user_feature_access.entry((caller, feature_id));
-            // assert(!user_access.read(), 'Invalid proof');
+            // assert(!user_access.read(), 'Invalid access');
             // let feature = self.features.entry(feature_id).read();
             // assert(feature.is_active, 'Feature inactive');
 
